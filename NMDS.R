@@ -19,7 +19,7 @@ ggsave(grid.draw(rbind(ggplotGrob(nmdsGeo), size = "last")), filename="plotNMDSg
 
 ########## Sample_Type NMDS ##########
 ### Find outlier samples ###
-macroA<-subset_samples(pruCore,Taxonomic_ID=="Mdecora") # keep only Macrobdella samples
+macroA<-subset_samples(corePhy,Taxonomic_ID=="Mdecora") # keep only Macrobdella samples
 dsNMDS2<-macroA #define data for analysis
 mNMDS2<-"wunifrac" # define metric for analysis
 # calculate distances
@@ -55,7 +55,7 @@ ggsave(grid.draw(rbind(ggplotGrob(nmdsType95), size = "last")), filename="plotNM
 
 ########## DaF NMDS ##########
 dsNMDSdaf<-subset_samples(macDaFpr,Sample_Type=="ILF") #define data for analysis
-mNMDSdaf<-"bray" # define metric for analysis
+mNMDSdaf<-"unifrac" # define metric for analysis
 # calculate distances
 distOrdDaf = phyloseq::distance(dsNMDSdaf, method = c(mNMDSdaf)) # calculate distances
 OrdDaf = ordinate(dsNMDSdaf, method = "PCoA", distance = distOrdDaf) # calculate ordination
@@ -72,15 +72,10 @@ ggsave(grid.draw(rbind(ggplotGrob(nmdsDaF), size = "last")), filename="plotNMDSd
 ##### Figure #####
 
 
-
-
-
-
-
 ########## Macrobdella Sample_Type/AnimalSource NMDS ##########
 macroBase<-subset_samples(phyBase,Taxonomic_ID=="Mdecora")
 macroBaseI<-subset_samples(macroBase,Sample_Type%in%c("ILF","Intestinum"))
-DistBC = phyloseq::distance(macroBaseI, method = "bray") # calculate distances
+DistBC = phyloseq::distance(macroBaseI, method = "unifrac") # calculate distances
 ordBC = ordinate(macroBaseI, method = "PCoA", distance = DistBC) # calculate ordination
 
 # PCoA. May want to change color= , shape= , alpha= , and size=

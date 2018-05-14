@@ -1,5 +1,9 @@
-prAdult<-subset_samples(physeqAn,Age=="A") # keep adult samples (prune Adult)
-hiAdult<-prune_taxa(taxa_sums(prAdult)>.01,prAdult) # keep taxa with at least 1% of 1 sample
+# Thank you to jeffkimbrel for the next two lines! #
+taxaDC <- setdiff(taxa_names(physeqAn), taxa_names(ps.allc)) # find the difference between taxa in contaminant list and physeqAn (taxa decontam)
+physeqDC <- prune_taxa(taxaDC, physeqAn) # keep only taxa not in taxaNC (physeq decontam)
+
+prAdult<-subset_samples(physeqDC,Age=="A") # keep adult samples (prune Adult)
+hiAdult<-prune_taxa(taxa_sums(prAdult)>.00001,prAdult) # keep taxa with at least .001% of 1 sample (number chosen to reduce # taxa as low as possible while bar chart still appears to add to 1. 
 hiro<-subset_samples(hiAdult,Sample_ID%in%c("A042117JGa.b","A042117JGd.b","A042317EMg.b","A042117JGa.i","A042317EMg.i","A050217EMr.i","A042317EMf.u","A042317EMh.u","A042317EMj.u"))
 macro<-subset_samples(hiAdult,Taxonomic_ID%in%c("Mdecora","Unk")) # subset containing only Macrobdella samples
 macroN<-subset_samples(macro,!Replicate%in%c("MN2","MN3","MN4"))
@@ -31,32 +35,32 @@ prevdtHvInt = fmhvInt[, list(Prevalence = sum(count >= cMin),
 hvILF<-subset_samples(hiro,Sample_Type=="ILF") # (Hirudo verbana ILF)
 fmhvILF = fast_melt(hvILF) # (fast melt Hirudo verbana ILF)
 prevdtHvILF = fmhvILF[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
 ###Macrobdella		
 macBlad<-subset_samples(macroS,Sample_Type=="Bladder") # (Hirudo verbana bladder)
 fmmacBlad = fast_melt(macBlad) # (fast melt Hirudo verbana bladder)
 prevdtmacBlad = fmmacBlad[, list(Prevalence = sum(count >= cMin), 
-                                 TotalPer = sum(count),
-                                 MinCount = min(count),
-                                 MaxCount = max(count)),
-                          by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana bladder)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana bladder)
 macInt<-subset_samples(macroS,Sample_Type=="Intestinum") # (Hirudo verbana intestinum)
 fmmacInt = fast_melt(macInt) # (fast melt Hirudo verbana intestinum)
 prevdtmacInt = fmmacInt[, list(Prevalence = sum(count >= cMin),
-                               TotalPer = sum(count),
-                               MinCount = min(count),
-                               MaxCount = max(count)),
-                        by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana intestinum)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana intestinum)
 macILF<-subset_samples(macroS,Sample_Type=="ILF") # (Hirudo verbana ILF)
 fmmacILF = fast_melt(macILF) # (fast melt Hirudo verbana ILF)
 prevdtmacILF = fmmacILF[, list(Prevalence = sum(count >= cMin), 
-                               TotalPer = sum(count),
-                               MinCount = min(count),
-                               MaxCount = max(count)),
-                        by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
 ###CT
 ctBlad<-subset_samples(ctMacro,Sample_Type=="Bladder") # (Hirudo verbana bladder)
 fmctBlad = fast_melt(ctBlad) # (fast melt Hirudo verbana bladder)
@@ -176,10 +180,8 @@ coreMac = unique(c(coreMacILF,coreMacInt,coreMacBlad))
 ###Core plot
 phyCon<-merge_phyloseq(macroS,hiro) # merge Macrobdella and Hirudo phyloseq objects (physeq control)
 phyBIU<-subset_samples(phyCon,Sample_Type!="Ovary") # remove ovary samples (physeq bladder, ILF, intestinum) 
-#phyBase<-subset_samples(phyBIU,!Da1F%in%c("1","2","4","7")) # remove days after feeding data to leave 0DaF and 5w (physeq base)
 phyBase<-subset_samples(phyBIU,Da1F%in%c("0","35","99","101","110")) # remove days after feeding data to leave 0DaF and 5w (physeq base)
 phyBasC<-subset_samples(phyBase,!Sample_ID%in%c("Ma5wF082117EMa.i","Ma5wF082117EMa.u","Ma5wF082117EMb.i","Ma5wF082117EMb.u","Ma5wF082117EMc.i","Ma5wF082117EMc.u")) # Remove ILF and intestinum samples from 5wF (physeq base clean)
-#macro<-subset_samples(phyBasC,Da1F=="0")
 
 ### Add new column to map data. 'Header' column will be used for pCore figure
 MAPcore<-sample_data(phyBasC) # pull map data from phyloseq object
@@ -190,18 +192,18 @@ MAPcore$Header<-with(MAPcore,
   ifelse(AnimalSource=="Wlot","CT",
   ifelse(AnimalSource=="MtSnowVT","VT",
   as.character(AnimalSource)))))))
-corePhy = merge_phyloseq(phyBasC,MAPcore) # return map data to the phyloseq object
+corePhy = merge_phyloseq(phyBasC,MAPcore) # return map data to the phyloseq object (Core phyloseq)
 
-coreTab<-prune_taxa(coreTot,corePhy)
+coreTab<-prune_taxa(coreTot,corePhy) # keep only taxa from the identified 'Core' 
 
 ########## Macrobdella Sites plot with 'Other' category ##########
-matCore <- sort(taxa_sums(corePhy), TRUE)[1:27] # Identify 27 most abundant taxa
-pruCore <- prune_taxa(names(matCore),corePhy) # Create a subset of data including only 10 most abundant taxa
+#matCore <- sort(taxa_sums(corePhy), TRUE)[1:35] # Identify 27 most abundant taxa
+#pruCore <- prune_taxa(names(matCore),corePhy) # Create a subset of data including only 27 most abundant taxa
 
-dtCore<-data.table(psmelt(pruCore))
+dtCore<-data.table(psmelt(corePhy))
 dtCore$Number<-as.character(dtCore$Number)
 dtCore$Genus<-as.character(dtCore$Genus)
-dtCore[!dtCore$Number%in%as.character(coreTot),]$Genus<-" "
+dtCore[!dtCore$Number%in%as.character(coreTot),]$Genus<-""
 
 dtCore$Genus<-with(dtCore,
   ifelse(Genus=="","other",
@@ -227,50 +229,40 @@ genus.color<-c(Aeromonas="#39ac39",
   Agrobacterium="#ff00aa",unk_Desulfovibrionaceae="#ffb3e6",
   unk_Alpha="#d9d9d9",unk_Beta="#ffffff", other="#808080")
 
-pCore <- ggplot(dtCore, aes(x=Sample,y=Abundance, fill=Genus)) + 
-  geom_bar(aes(), stat="identity", position="stack") +
-  facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") +
-  theme(text=element_text(angle=90,size=10), axis.title.x=element_blank()) +
-  scale_fill_manual(values=genus.color)
-pCore # print plot
-
-
 pCore <- ggplot(dtCore, aes(x=Replicate, y=Abundance, fill=Genus)) + 
   geom_bar(aes(), stat="identity", position="stack") +
   facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") +
   theme(text=element_text(size=10), axis.title.x=element_blank()) +
-  scale_fill_manual(values=pairBiome)
+  scale_fill_manual(values=genus.color)
 pCore # print plot
 
-##### Figure #####
+##### Figure + Table #####
 ggsave(grid.draw(rbind(ggplotGrob(pCore), size = "last")), filename="plotCore.png", width=12,height=8)
-##### Figure #####
-
-##### Table #####
 write.table(tax_table(pruCore), "taxTable.csv", sep=",")
-##### Table #####
+##### Figure + Table #####
 
 ### Clean-up using .999 with NMDS plot (removes 3 ILF and 1 intestinum samples) ###
-clean99<-subset_samples(pruCore,!sample_names(pruCore)%in%c("MAa0dF110814EMc.iD506","Ma061817EMc.iD486","MAa0dF110814EMa.iD493","W66B.N","MAa0dF110814EMb.iD449"))
+clean99<-subset_samples(corePhy,!sample_names(coreTab)%in%c("MAa0dF110814EMc.iD506","Ma061817EMc.iD486","MAa0dF110814EMa.iD493","W66B.N","MAa0dF110814EMb.iD449"))
 
 dtCore<-data.table(psmelt(clean99))
 dtCore$Number<-as.character(dtCore$Number)
 dtCore$Genus<-as.character(dtCore$Genus)
-dtCore[!dtCore$Number%in%as.character(coreTot),]$Genus<-" "
+dtCore[!dtCore$Number%in%as.character(coreTot),]$Genus<-""
 
 dtCore$Genus<-with(dtCore,
-                   ifelse(Genus=="","other",
-                          as.character(Genus)))
+  ifelse(Genus=="","other",
+  as.character(Genus)))
 
-dtCore$Genus <- factor(dtCore$Genus, levels=c("Aeromonas",
-                                              "Bacteroides","PW3","AF12",
-                                              "unk_Ruminococcaceae","unk_Clostridiales",
-                                              "Ochrobactrum","Pedobacter","unk_Comamonadaceae","Bdellovibrio",
-                                              "unk_Rhodospirillaceae","unk_Rhodospirillales",
-                                              "unk_Myxococcales","unk_Rhodocyclaceae",
-                                              "unk_Rhizobiales","unk_Rhizobiaceae",
-                                              "Agrobacterium","unk_Desulfovibrionaceae",
-                                              "unk_Alpha","unk_Beta","other"))
+dtCore$Genus <- factor(dtCore$Genus, 
+  levels=c("Aeromonas",
+           "Bacteroides","PW3","AF12",
+           "unk_Ruminococcaceae","unk_Clostridiales",
+           "Ochrobactrum","Pedobacter","unk_Comamonadaceae","Bdellovibrio",
+           "unk_Rhodospirillaceae","unk_Rhodospirillales",
+           "unk_Myxococcales","unk_Rhodocyclaceae",
+           "unk_Rhizobiales","unk_Rhizobiaceae",
+           "Agrobacterium","unk_Desulfovibrionaceae",
+           "unk_Alpha","unk_Beta","other"))
 
 genus.color<-c(Aeromonas="#39ac39",
                Bacteroides="#B80000",PW3="#F00000",AF12="#FF7777",
@@ -288,6 +280,4 @@ pCore99 <- ggplot(dtCore, aes(x=Replicate,y=Abundance, fill=Genus)) +
   theme(text=element_text(size=10), axis.title.x=element_blank()) +
   scale_fill_manual(values=genus.color)
 pCore99 # print plot
-
-
 
