@@ -176,6 +176,7 @@ coreMacBlad = prevdtmacBlad[(Prevalence >= cp*nsamples(subset_samples(macBlad,Sa
 
 coreTot = unique(c(coreHvILF,coreHvInt,coreHvBlad,coreCtILF,coreCtInt,coreMaILF,coreMaInt,coreMaBlad,coreNyILF,coreNyBlad,coreVtBlad))
 coreMac = unique(c(coreMacILF,coreMacInt,coreMacBlad))
+coreMdHv = unique(c(coreMacILF,coreMacInt,coreMacBlad,coreHvILF,coreHvInt,coreHvBlad))
 
 ###Core plot
 phyCon<-merge_phyloseq(macroS,hiro) # merge Macrobdella and Hirudo phyloseq objects (physeq control)
@@ -229,6 +230,7 @@ genus.color<-c(Aeromonas="#39ac39",
   Agrobacterium="#ff00aa",unk_Desulfovibrionaceae="#ffb3e6",
   unk_Alpha="#d9d9d9",unk_Beta="#ffffff", other="#808080")
 
+
 pCore <- ggplot(dtCore, aes(x=Replicate, y=Abundance, fill=Genus)) + 
   geom_bar(aes(), stat="identity", position="stack") +
   facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") +
@@ -281,3 +283,42 @@ pCore99 <- ggplot(dtCore, aes(x=Replicate,y=Abundance, fill=Genus)) +
   scale_fill_manual(values=genus.color)
 pCore99 # print plot
 
+### Add core columns to taxa table ###
+coreMdHv<-prune_taxa(coreMdHv,corePhy) # keep only taxa from the identified 'Core' 
+TAXcore<-tax_table(coreMdHv) # pull taxonomy data from phyloseq object
+dt.TAXcore<-as.data.table(TAXcore) # Change taxa_table to a data.table
+dt.TAXcore$Number<-as.character(dt.TAXcore$Number) # force TAXcore$Number to be a character
+
+# Macrobdella core data
+taxdt.MacInt<-as.data.table(coreMacInt)
+taxdt.MacInt$Md.Intestinum<-"x"
+setnames(taxdt.MacInt,"coreMacInt", "Number") # First column = OTU names. Change column heading
+
+taxdt.MacILF<-as.data.table(coreMacILF)
+taxdt.MacILF$Md.ILF<-"x"
+setnames(taxdt.MacILF,"coreMacILF", "Number") # First column = OTU names. Change column heading
+
+taxdt.MacBlad<-as.data.table(coreMacBlad)
+taxdt.MacBlad$Md.Bladder<-"x"
+setnames(taxdt.MacBlad,"coreMacBlad", "Number") # First column = OTU names. Change column heading
+
+#Hirudo core data
+taxdt.HvInt<-as.data.table(coreHvInt)
+taxdt.HvInt$Hv.Intestinum<-"x"
+setnames(taxdt.HvInt,"coreHvInt", "Number") # First column = OTU names. Change column heading
+
+taxdt.HvILF<-as.data.table(coreHvILF)
+taxdt.HvILF$Hv.ILF<-"x"
+setnames(taxdt.HvILF,"coreHvILF", "Number") # First column = OTU names. Change column heading
+
+taxdt.HvBlad<-as.data.table(coreHvBlad)
+taxdt.HvBlad$Hv.Bladder<-"x"
+setnames(taxdt.HvBlad,"coreHvBlad", "Number") # First column = OTU names. Change 
+
+# Merge tables
+list.taxdt <- list(dt.TAXcore,taxdt.MacILF,taxdt.MacInt,taxdt.MacBlad,taxdt.HvILF,taxdt.HvInt,taxdt.HvBlad) # list of data.tables to merge (list of taxonomy data.tables)
+lapply(tbls, function(i) setkey(i, Number)) # set key for merge function
+TAXcore2 <- Reduce(function(...) merge(..., all = T), list.taxdt) # merge list of data.tables, keeping values even if not present in each table (Taxonomy table core 2)
+TAXcore2[is.na(TAXcore2)] <- "" # replace <NA> values with empty values
+write.table(TAXcore2, "taxTableCore.csv", row.names=FALSE,sep=",") # export table to csv, row names excluded
+### Add core columns to taxa table ###
