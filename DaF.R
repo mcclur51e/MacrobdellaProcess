@@ -10,8 +10,8 @@ mdDaF$Da1F<-with(mdDaF,
   as.character(Da1F))))  
 macDaf<-phyloseq(otu_table(macDaf),tax_table(macDaf),mdDaF,phy_tree(macDaf))
 
-macDafI<-subset_samples(macDaf,Sample_Type%in%c("ILF","Intestinum")) # Keep only ILF and intestinum samples
-macDaFpr<-prune_taxa(taxa_sums(macDafI)>.01,macDafI) # keep taxa with at least 1% of 1 sample
+macDafGI<-subset_samples(macDaf,Sample_Type%in%c("ILF","Intestinum")) # Keep only ILF and intestinum samples
+macDaFpr<-prune_taxa(taxa_sums(macDafGI)>.01,macDafGI) # keep taxa with at least 1% of 1 sample
 sample_data(macDaFpr)$Da1F = factor(sample_data(macDaFpr)$Da1F, levels = c(0,1,2,4,7,30,113,215)) # Reorder Da1F
 
 ### Make plot

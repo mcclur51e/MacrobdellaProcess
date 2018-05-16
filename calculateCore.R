@@ -317,8 +317,8 @@ setnames(taxdt.HvBlad,"coreHvBlad", "Number") # First column = OTU names. Change
 
 # Merge tables
 list.taxdt <- list(dt.TAXcore,taxdt.MacILF,taxdt.MacInt,taxdt.MacBlad,taxdt.HvILF,taxdt.HvInt,taxdt.HvBlad) # list of data.tables to merge (list of taxonomy data.tables)
-lapply(tbls, function(i) setkey(i, Number)) # set key for merge function
+lapply(list.taxdt, function(i) setkey(i, Number)) # set key for merge function
 TAXcore2 <- Reduce(function(...) merge(..., all = T), list.taxdt) # merge list of data.tables, keeping values even if not present in each table (Taxonomy table core 2)
 TAXcore2[is.na(TAXcore2)] <- "" # replace <NA> values with empty values
-write.table(TAXcore2, "taxTableCore.csv", row.names=FALSE,sep=",") # export table to csv, row names excluded
+write.table(TAXcore2, "tableTax_Core.csv", row.names=FALSE,sep=",") # export table to csv, row names excluded
 ### Add core columns to taxa table ###
