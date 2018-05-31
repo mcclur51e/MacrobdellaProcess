@@ -3,7 +3,10 @@ taxaDC <- setdiff(taxa_names(physeqAn), taxa_names(ps.allc)) # find the differen
 physeqDC <- prune_taxa(taxaDC, physeqAn) # keep only taxa not in taxaNC (physeq decontam)
 
 prAdult<-subset_samples(physeqDC,Age=="A") # keep adult samples (prune Adult)
-hiAdult<-prune_taxa(taxa_sums(prAdult)>.00001,prAdult) # keep taxa with at least .001% of 1 sample (number chosen to reduce # taxa as low as possible while bar chart still appears to add to 1. 
+#hiAdult<-prune_taxa(taxa_sums(prAdult)>.00001,prAdult) # keep taxa with at least .001% of 1 sample (number chosen to reduce # taxa as low as possible while bar chart still appears to add to 1. 
+#hiAdult<-prAdult
+
+prAdult<-subset_samples(phy.noAn,Age=="A") # keep adult samples (prune Adult)
 hiro<-subset_samples(hiAdult,Sample_ID%in%c("A042117JGa.b","A042117JGd.b","A042317EMg.b","A042117JGa.i","A042317EMg.i","A050217EMr.i","A042317EMf.u","A042317EMh.u","A042317EMj.u"))
 macro<-subset_samples(hiAdult,Taxonomic_ID%in%c("Mdecora","Unk")) # subset containing only Macrobdella samples
 macroN<-subset_samples(macro,!Replicate%in%c("MN2","MN3","MN4"))
@@ -15,7 +18,7 @@ vtMacro<-subset_samples(macroS,AnimalSource=="MtSnowVT") # subset containing onl
 
 cMin<-0.01 # define minimum to count prevalence in a sample
 cp<-c(.5) # define the level for determining core OTUs, reported as a percent of the samples tested (core percent)
-### Calculated with 75% cut-off rather than 95% cut-off due to low sample size ###
+### Calculated with 50% cut-off rather than 95% cut-off due to low sample size ###
 
 ###Hirudo
 hvBlad<-subset_samples(hiro,Sample_Type=="Bladder") # (Hirudo verbana bladder)
@@ -65,90 +68,90 @@ prevdtmacILF = fmmacILF[, list(Prevalence = sum(count >= cMin),
 ctBlad<-subset_samples(ctMacro,Sample_Type=="Bladder") # (Hirudo verbana bladder)
 fmctBlad = fast_melt(ctBlad) # (fast melt Hirudo verbana bladder)
 prevdtctBlad = fmctBlad[, list(Prevalence = sum(count >= cMin), 
-                               TotalPer = sum(count),
-                               MinCount = min(count),
-                               MaxCount = max(count)),
-                        by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana bladder)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana bladder)
 ctInt<-subset_samples(ctMacro,Sample_Type=="Intestinum") # (Hirudo verbana intestinum)
 fmctInt = fast_melt(ctInt) # (fast melt Hirudo verbana intestinum)
 prevdtctInt = fmctInt[, list(Prevalence = sum(count >= cMin),
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana intestinum)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana intestinum)
 ctILF<-subset_samples(ctMacro,Sample_Type=="ILF") # (Hirudo verbana ILF)
 fmctILF = fast_melt(ctILF) # (fast melt Hirudo verbana ILF)
 prevdtctILF = fmctILF[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
 ###MA
 maBlad<-subset_samples(maMacro,Sample_Type=="Bladder") # (Massachusetts bladder)
 fmmaBlad = fast_melt(maBlad) # (fast melt Massachusetts bladder)
 prevdtmaBlad = fmmaBlad[, list(Prevalence = sum(count >= cMin), 
-                               TotalPer = sum(count),
-                               MinCount = min(count),
-                               MaxCount = max(count)),
-                        by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Massachusetts bladder)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Massachusetts bladder)
 maInt<-subset_samples(maMacro,Sample_Type=="Intestinum") # (Massachusetts intestinum)
 fmmaInt = fast_melt(maInt) # (fast melt Massachusetts intestinum)
 prevdtmaInt = fmmaInt[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Massachusetts intestinum)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Massachusetts intestinum)
 maILF<-subset_samples(maMacro,Sample_Type=="ILF") # (Massachusetts ILF)
 fmmaILF = fast_melt(maILF) # (fast melt Massachusetts ILF)
 prevdtmaILF = fmmaILF[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Massachusetts ILF)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Massachusetts ILF)
 ###NY
 nyBlad<-subset_samples(nyMacro,Sample_Type=="Bladder") # (New York bladder)
 fmnyBlad = fast_melt(nyBlad) # (fast melt New York bladder)
 prevdtnyBlad = fmnyBlad[, list(Prevalence = sum(count >= cMin), 
-                               TotalPer = sum(count),
-                               MinCount = min(count),
-                               MaxCount = max(count)),
-                        by = TaxaID] # nyke simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table New York bladder)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table New York bladder)
 nyInt<-subset_samples(nyMacro,Sample_Type=="Intestinum") # (New York intestinum)
 fmnyInt = fast_melt(nyInt) # (fast melt New York intestinum)
 prevdtnyInt = fmnyInt[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # nyke simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table New York intestinum)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table New York intestinum)
 nyILF<-subset_samples(nyMacro,Sample_Type=="ILF") # (New York ILF)
 fmnyILF = fast_melt(nyILF) # (fast melt New York ILF)
 prevdtnyILF = fmnyILF[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # nyke simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table New York ILF)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table New York ILF)
 ###VT
 vtBlad<-subset_samples(vtMacro,Sample_Type=="Bladder") # (Vermont bladder)
 fmvtBlad = fast_melt(vtBlad) # (fast melt Vermont bladder)
 prevdtvtBlad = fmvtBlad[, list(Prevalence = sum(count >= cMin), 
-                               TotalPer = sum(count),
-                               MinCount = min(count),
-                               MaxCount = max(count)),
-                        by = TaxaID] # vtke simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Vermont bladder)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Vermont bladder)
 vtInt<-subset_samples(vtMacro,Sample_Type=="Intestinum") # (Vermont intestinum)
 fmvtInt = fast_melt(vtInt) # (fast melt Vermont intestinum)
 prevdtvtInt = fmvtInt[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # vtke simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Vermont intestinum)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Vermont intestinum)
 vtILF<-subset_samples(vtMacro,Sample_Type=="ILF") # (Vermont ILF)
 fmvtILF = fast_melt(vtILF) # (fast melt Vermont ILF)
 prevdtvtILF = fmvtILF[, list(Prevalence = sum(count >= cMin), 
-                             TotalPer = sum(count),
-                             MinCount = min(count),
-                             MaxCount = max(count)),
-                      by = TaxaID] # vtke simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Vermont ILF)
+  TotalPer = sum(count),
+  MinCount = min(count),
+  MaxCount = max(count)),
+  by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Vermont ILF)
 
 coreHvILF = prevdtHvILF[(Prevalence >= cp*nsamples(subset_samples(hvILF,Sample_Type=="ILF")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo ILF
 coreHvInt = prevdtHvInt[(Prevalence >= cp*nsamples(subset_samples(hvInt,Sample_Type=="Intestinum")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo Intestinum
@@ -238,6 +241,14 @@ pCore <- ggplot(dtCore, aes(x=Replicate, y=Abundance, fill=Genus)) +
   scale_fill_manual(values=genus.color)
 pCore # print plot
 
+
+pCore <- ggplot(dtCore, aes(x=Replicate, y=Abundance, fill=Genus)) + 
+  geom_bar(aes(), stat="identity", position="stack") +
+  facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") +
+  theme(text=element_text(size=10), axis.title.x=element_blank()) +
+  scale_fill_manual(values=genus.color)
+pCore # print plot
+
 ##### Figure + Table #####
 ggsave(grid.draw(rbind(ggplotGrob(pCore), size = "last")), filename="plotCore.png", width=12,height=8)
 write.table(tax_table(pruCore), "taxTable.csv", sep=",")
@@ -246,9 +257,9 @@ write.table(tax_table(pruCore), "taxTable.csv", sep=",")
 ### Clean-up using .999 with NMDS plot (removes 3 ILF and 1 intestinum samples) ###
 clean99<-subset_samples(corePhy,!sample_names(coreTab)%in%c("MAa0dF110814EMc.iD506","Ma061817EMc.iD486","MAa0dF110814EMa.iD493","W66B.N","MAa0dF110814EMb.iD449"))
 
-dtCore<-data.table(psmelt(clean99))
-dtCore$Number<-as.character(dtCore$Number)
-dtCore$Genus<-as.character(dtCore$Genus)
+dtCore<-data.table(psmelt(clean99)) # melt data table from clean99 phyloseq object
+dtCore$Number<-as.character(dtCore$Number) # make 'Number' column into a character, because R
+dtCore$Genus<-as.character(dtCore$Genus) # make 'Genus' column into a character, because R
 dtCore[!dtCore$Number%in%as.character(coreTot),]$Genus<-""
 
 dtCore$Genus<-with(dtCore,
@@ -282,7 +293,56 @@ pCore99 <- ggplot(dtCore, aes(x=Replicate,y=Abundance, fill=Genus)) +
   theme(text=element_text(size=10), axis.title.x=element_blank()) +
   scale_fill_manual(values=genus.color)
 pCore99 # print plot
+ggsave(grid.draw(rbind(ggplotGrob(pCore99), size = "last")), filename="plotCore99.png", width=12,height=8)
 
+### Clean-up using .999 with NMDS plot (removes 3 ILF and 1 intestinum samples) ###
+dt.CoreOrd<-data.table(psmelt(clean99))
+dt.CoreOrd$Number<-as.character(dt.CoreOrd$Number)
+dt.CoreOrd$Order<-as.character(dt.CoreOrd$Order)
+dt.CoreOrd[!dt.CoreOrd$Number%in%as.character(coreTot),]$Order<-""
+
+dt.CoreOrd$Order<-with(dt.CoreOrd,
+  ifelse(Order=="","other",
+  ifelse(Order=="NA","other",
+  as.character(Order))))
+
+dt.CoreOrd$Order <- factor(dt.CoreOrd$Order, 
+  levels=c("Aeromonadales",
+           "Bacteroidales",
+           "Clostridiales",
+           "Rhizobiales",
+           "Rhodospirillales",
+           "Desulfovibrionales",
+           "Bdellovibrionales",
+           "Burkholderiales",
+           "Sphingobacteriales",
+           "Myxococcales",
+           "Rhodocyclales",
+           "unk_Alpha",
+           "unk_Beta",
+           "other"))
+
+Order.color<-c(Aeromonadales="#39ac39",
+               Bacteroidales="#F00000",
+               Clostridiales="#3333ff",
+               Bdellovibrionales="#ff9933",Burkholderiales="#ffbf80",
+               Rhodospirillales="#ac00e6",
+               Sphingobacteriales="#ffcccc",
+               Myxococcales="#ffff00",
+               Rhodocyclales="#ff00aa",
+               Rhizobiales="#00ccff",
+               Desulfovibrionales="#ff00aa",
+               unk_Alpha="#d9d9d9",unk_Beta="#ffffff", other="#808080")
+
+pCoreOrd99 <- ggplot(dt.CoreOrd, aes(x=Replicate,y=Abundance, fill=Order)) + 
+  geom_bar(aes(), stat="identity", position="stack") +
+  facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") +
+  theme(text=element_text(size=10), axis.title.x=element_blank()) +
+  scale_fill_manual(values=Order.color)
+pCoreOrd99 # print plot
+ggsave(grid.draw(rbind(ggplotGrob(pCoreOrd99), size = "last")), filename="plotCoreOrd99.png", width=12,height=8)
+
+########## Print table of core taxa with columns indicating which sample type each is present in ##########
 ### Add core columns to taxa table ###
 coreMdHv<-prune_taxa(coreMdHv,corePhy) # keep only taxa from the identified 'Core' 
 TAXcore<-tax_table(coreMdHv) # pull taxonomy data from phyloseq object

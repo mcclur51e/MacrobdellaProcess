@@ -82,7 +82,7 @@ bwdat<-macILFfam
 sample_data(macIntFam)$Da1F = factor(sample_data(macIntFam)$Da1F, levels = c(0,1,2,4,7,14,28,30,113,215)) # Reorder Da1F
 bwMAT <- sort(taxa_sums(bwdat), TRUE)[1:5] # Identify 5 most abundant taxa
 bwdatP<-prune_taxa(names(bwMAT),bwdat) # keep only most abundant taxa (box+whisker data pruned)
-bwdatPmer<-merge_taxa(bwdatP,"Genus")
+bwdatPmer<-tax_glom(bwdatP,"Genus")
 
 lowA<-1e-3 # set ymin
 bwMelt <- psmelt(bwdatPmer) # create data.table from phyloseq object, bwdatFam (box+whisker melt)
@@ -147,7 +147,7 @@ pProt <- ggplot(bwMelt) +
   facet_grid(~Genus, scales="free_x",space="free") +
   geom_line(data=bwMelt,aes(x=as.numeric(Da1F),y=Q50),linetype=2) + 
   geom_ribbon(data=bwMelt, aes(x=as.numeric(Da1F), ymin=Q25, ymax=Q75),fill="red", alpha=0.1) +
-  theme(text=element_text(size=10),strip.text=element_text(size=rel(.5)), axis.title.x=element_blank(), legend.position="none") +
+  theme(text=element_text(size=10),strip.text=element_text(size=rel(1)), axis.title.x=element_blank(), legend.position="none") +
   scale_fill_manual(values=rainbow)   
 pProt
 

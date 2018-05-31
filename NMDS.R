@@ -1,5 +1,6 @@
 ########## ILF/AnimalSource NMDS ##########
-macroAa<-subset_samples(corePhy,Taxonomic_ID=="Mdecora") # keep only Macrobdella samples
+### May want to change back to just phyCore
+macroAa<-subset_samples(phyBasC,Taxonomic_ID=="Mdecora") # keep only Macrobdella samples
 macroA<-subset_samples(macroAa,sample_names(macroAa)!="MAa0dF110814EMb.iD449") # remove obvious outlier that seems to be pure bladder
 dsNMDS<-subset_samples(macroA,Sample_Type=="ILF") # keep only ILF samples. define data for analysis
 mNMDS<-"unifrac" # define metric for analysis
@@ -79,8 +80,14 @@ DistBC = phyloseq::distance(macroBaseI, method = "unifrac") # calculate distance
 ordBC = ordinate(macroBaseI, method = "PCoA", distance = DistBC) # calculate ordination
 
 # PCoA. May want to change color= , shape= , alpha= , and size=
-nmdsMacro<-plot_ordination(macroBaseI, ordBC, color = "AnimalSource") + 
-  geom_point(size=8,mapping = aes(color=AnimalSource,shape = Sample_Type)) +
+nmdsMacro<-plot_ordination(macroBaseI, ordBC, color = "Sample_Type") + 
+  geom_point(size=8,mapping = aes(color=Sample_Type)) +
+  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
   ggtitle("PCoA: Bray-Curtis") +
   scale_color_manual(values=brewer.pal(6,"Set1")) 
 nmdsMacro
+ggsave(grid.draw(rbind(ggplotGrob(nmdsMacro), size = "last")), filename="plotNMDSmacro.png", width=8,height=8)
+
+
+
+

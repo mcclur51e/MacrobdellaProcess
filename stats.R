@@ -1,4 +1,4 @@
-
+########## Compare statistical differences between sample groups using PERMANOVA ##########
 ### Define groups (based off phyloseq object from 'DaF.R') ### 
 macDafGI<-subset_samples(macDaf,Sample_Type%in%c("ILF","Intestinum")) # Keep only ILF and intestinum samples
 macDaFp<-prune_taxa(taxa_sums(macDafGI)>.0,macDafGI) # keep taxa present in at least 1 sample

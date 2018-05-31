@@ -1,6 +1,6 @@
 ########## Pre-process Data ##########
 ### Remove taxa in fewer than 3 (total) samples and with fewer than 100 reads (<=1%) in at least one sample
-toolow<-prune_taxa(taxa_sums(physeq)>100,physeq) # Remove OTUs with < 100 reads over all samples (1% of 1 sample)
+toolow<-prune_taxa(taxa_sums(physeq10)>100,physeq10) # Remove OTUs with < 100 reads over all samples (1% of 1 sample)
 fmToolow = fast_melt(toolow) # (fast melt toolow)
 prev.fmToolow = fmToolow[, list(Prevalence = sum(count >= cMin), 
   TotalPer = sum(count),
