@@ -71,8 +71,6 @@ ggsave(grid.draw(rbind(ggplotGrob(pDaF), size = "last")), filename="plotDaF.png"
 write.table(sample_data(macDaFpr), "taxTable.csv", sep=",")
 ##### Table #####
 
-
-
 ### Box + whisker ###
 library(grid)
 library(gtable)
@@ -80,8 +78,7 @@ library(gtable)
 bwdat<-macILFfam
 
 sample_data(macIntFam)$Da1F = factor(sample_data(macIntFam)$Da1F, levels = c(0,1,2,4,7,14,28,30,113,215)) # Reorder Da1F
-bwMAT <- sort(taxa_sums(bwdat), TRUE)[1:5] # Identify 5 most abundant taxa
-bwdatP<-prune_taxa(names(bwMAT),bwdat) # keep only most abundant taxa (box+whisker data pruned)
+bwdatP<-prune_taxa(c(coreMacILF),bwdat) # keep only core ILF taxa (box+whisker data pruned)
 bwdatPmer<-tax_glom(bwdatP,"Genus")
 
 lowA<-1e-3 # set ymin

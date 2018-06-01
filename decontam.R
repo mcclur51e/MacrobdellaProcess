@@ -32,9 +32,9 @@ head(which(contamdf.freq$contaminant)) # list ranking of contaminant OTUs
 ps.contamFreq <- prune_taxa(contamdf.freq$contaminant, ps)
 #taxa_names(ps.contamFreq) # list contaminant OTUs
 tax_table(ps.contamFreq)[,6] # list contaminant genera
-plot_frequency(ps, taxa_names(ps)[c(28,501,981,1017,591,1033)], conc="q2")
+plot_frequency(ps, taxa_names(ps)[c(2,16,7,10,59,65,58)], conc="q2")
 
-write.table(contamdf.freq, "contamFreqTable.csv", sep=",")
+write.table(contamdf.freq, "contamFreqTable.csv", row.names=TRUE, rowsep=",")
 write.table(tax_table(ps.contamFreq), "contamTaxFreq.csv", sep=",")
 
 ### Prevalence ###

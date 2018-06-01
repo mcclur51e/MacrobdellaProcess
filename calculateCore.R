@@ -153,29 +153,29 @@ prevdtvtILF = fmvtILF[, list(Prevalence = sum(count >= cMin),
   MaxCount = max(count)),
   by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Vermont ILF)
 
-coreHvILF = prevdtHvILF[(Prevalence >= cp*nsamples(subset_samples(hvILF,Sample_Type=="ILF")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo ILF
-coreHvInt = prevdtHvInt[(Prevalence >= cp*nsamples(subset_samples(hvInt,Sample_Type=="Intestinum")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo Intestinum
-coreHvBlad = prevdtHvBlad[(Prevalence >= cp*nsamples(subset_samples(hvBlad,Sample_Type=="Bladder")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo Bladder
+coreHvILF = prevdtHvILF[(Prevalence >= cp*nsamples(subset_samples(hvILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo ILF
+coreHvInt = prevdtHvInt[(Prevalence >= cp*nsamples(subset_samples(hvInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo Intestinum
+coreHvBlad = prevdtHvBlad[(Prevalence >= cp*nsamples(subset_samples(hvBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo Bladder
 
-coreCtILF = prevdtctILF[(Prevalence >= cp*nsamples(subset_samples(ctILF,Sample_Type=="ILF")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo ILF 
-coreCtInt = prevdtctInt[(Prevalence >= cp*nsamples(subset_samples(ctInt,Sample_Type=="Intestinum")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo Intestinum
-coreCtBlad = prevdtctBlad[(Prevalence >= cp*nsamples(subset_samples(ctBlad,Sample_Type=="Bladder")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Hirudo Bladder
+coreCtILF = prevdtctILF[(Prevalence >= cp*nsamples(subset_samples(ctILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo ILF 
+coreCtInt = prevdtctInt[(Prevalence >= cp*nsamples(subset_samples(ctInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo Intestinum
+coreCtBlad = prevdtctBlad[(Prevalence >= cp*nsamples(subset_samples(ctBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo Bladder
 
-coreMaILF = prevdtmaILF[(Prevalence >= cp*nsamples(subset_samples(maILF,Sample_Type=="ILF")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts ILF (
-coreMaInt = prevdtmaInt[(Prevalence >= cp*nsamples(subset_samples(maInt,Sample_Type=="Intestinum")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts Intestinum
-coreMaBlad = prevdtmaBlad[(Prevalence >= cp*nsamples(subset_samples(maBlad,Sample_Type=="Bladder")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts Bladder
+coreMaILF = prevdtmaILF[(Prevalence >= cp*nsamples(subset_samples(maILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts ILF (
+coreMaInt = prevdtmaInt[(Prevalence >= cp*nsamples(subset_samples(maInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts Intestinum
+coreMaBlad = prevdtmaBlad[(Prevalence >= cp*nsamples(subset_samples(maBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts Bladder
 
-coreNyILF = prevdtnyILF[(Prevalence >= cp*nsamples(subset_samples(nyILF,Sample_Type=="ILF")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella New York ILF
-coreNyInt = prevdtnyInt[(Prevalence >= cp*nsamples(subset_samples(nyInt,Sample_Type=="Intestinum")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella New York Intestinum
-coreNyBlad = prevdtnyBlad[(Prevalence >= cp*nsamples(subset_samples(nyBlad,Sample_Type=="Bladder")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella New York Bladder
+coreNyILF = prevdtnyILF[(Prevalence >= cp*nsamples(subset_samples(nyILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella New York ILF
+coreNyInt = prevdtnyInt[(Prevalence >= cp*nsamples(subset_samples(nyInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella New York Intestinum
+coreNyBlad = prevdtnyBlad[(Prevalence >= cp*nsamples(subset_samples(nyBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella New York Bladder
 
-coreVtILF = prevdtvtILF[(Prevalence >= cp*nsamples(subset_samples(vtILF,Sample_Type=="ILF")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Vermont ILF (
-coreVtInt = prevdtvtInt[(Prevalence >= cp*nsamples(subset_samples(vtInt,Sample_Type=="Intestinum")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Vermont Intestinum
-coreVtBlad = prevdtvtBlad[(Prevalence >= cp*nsamples(subset_samples(vtBlad,Sample_Type=="Bladder")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Vermont Bladder
+coreVtILF = prevdtvtILF[(Prevalence >= cp*nsamples(subset_samples(vtILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont ILF (
+coreVtInt = prevdtvtInt[(Prevalence >= cp*nsamples(subset_samples(vtInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Intestinum
+coreVtBlad = prevdtvtBlad[(Prevalence >= cp*nsamples(subset_samples(vtBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Bladder
 
-coreMacILF = prevdtmacILF[(Prevalence >= cp*nsamples(subset_samples(macILF,Sample_Type=="ILF")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Vermont ILF (
-coreMacInt = prevdtmacInt[(Prevalence >= cp*nsamples(subset_samples(macInt,Sample_Type=="Intestinum")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Vermont Intestinum
-coreMacBlad = prevdtmacBlad[(Prevalence >= cp*nsamples(subset_samples(macBlad,Sample_Type=="Bladder")) & MaxCount >= .01), TaxaID] # Make list of core OTUs for Macrobdella Vermont Bladder
+coreMacILF = prevdtmacILF[(Prevalence >= cp*nsamples(subset_samples(macILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont ILF (
+coreMacInt = prevdtmacInt[(Prevalence >= cp*nsamples(subset_samples(macInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Intestinum
+coreMacBlad = prevdtmacBlad[(Prevalence >= cp*nsamples(subset_samples(macBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Bladder
 
 coreTot = unique(c(coreHvILF,coreHvInt,coreHvBlad,coreCtILF,coreCtInt,coreMaILF,coreMaInt,coreMaBlad,coreNyILF,coreNyBlad,coreVtBlad))
 coreMac = unique(c(coreMacILF,coreMacInt,coreMacBlad))
