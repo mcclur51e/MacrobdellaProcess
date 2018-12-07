@@ -1,7 +1,14 @@
 ########## Separate environmental interaction groups and plot to evaluate if enough samples have been sequenced ##########
+# 
+most_abundant_taxa <- sort(taxa_sums(juv), TRUE)[1:27] # Identify 15 most abundant taxa
+pruned <- prune_taxa(names(most_abundant_taxa),juv) # Create a subset of data including only 10 most abundant taxa
+plot_bar(pruned,fill="Genus") + facet_grid(RunDate~., scales="free_x",space="free") + scale_fill_manual(values=pairBiome)
+
+
+
 
 # Control
-juvCon1F<-subset_samples(juvCon,Da1F%in%c("0","1","2","4","7"))
+juvCon1F<-subset_samples(juvCon,O_Da1F%in%c("0","1","2","4","7"))
 juvConT<-transform_sample_counts(juvCon1F, function(x) x/sum(x)) # transform raw counts to fraction
 most_abundant_taxa <- sort(taxa_sums(juvConT), TRUE)[1:15] # Identify 15 most abundant taxa
 pruned <- prune_taxa(names(most_abundant_taxa),juvConT) # Create a subset of data including only 10 most abundant taxa

@@ -1,7 +1,8 @@
 ########## ILF/AnimalSource NMDS ##########
-### May want to change back to just phyCore
-macroAa<-subset_samples(phyBasC,Taxonomic_ID=="Mdecora") # keep only Macrobdella samples
-macroA<-subset_samples(macroAa,sample_names(macroAa)!="MAa0dF110814EMb.iD449") # remove obvious outlier that seems to be pure bladder
+dir.create("NMDS") # create folder for data output(s)
+
+macroA<-subset_samples(prAdult,Taxonomic_ID=="Mdecora") # keep only Macrobdella samples
+#macroA<-subset_samples(macroAa,sample_names(macroAa)!="MAa0dF110814EMb.iD449") # remove obvious outlier that seems to be pure bladder
 dsNMDS<-subset_samples(macroA,Sample_Type=="ILF") # keep only ILF samples. define data for analysis
 mNMDS<-"unifrac" # define metric for analysis
 # calculate distances
@@ -15,7 +16,7 @@ nmdsGeo<-plot_ordination(dsNMDS, ord, color = "AnimalSource") +
   scale_color_manual(values=brewer.pal(7,"Set1")) 
 nmdsGeo
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(nmdsGeo), size = "last")), filename="plotNMDSgeo.png", width=8,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(nmdsGeo), size = "last")), filename="NMDS/plotNMDSgeo.png", width=8,height=8)
 ##### Figure #####
 
 ########## Sample_Type NMDS ##########
@@ -30,32 +31,15 @@ ord2 = ordinate(dsNMDS2, method = "PCoA", distance = distOrd2) # calculate ordin
 nmdsType<-plot_ordination(dsNMDS2, ord2, color = "Sample_Type") + 
   geom_point(size=6,mapping = aes(color=Sample_Type)) +
   ggtitle(c(mNMDS2)) + 
-  stat_ellipse(type = "t", level = 0.999, linetype = 2) +
+  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
   scale_color_manual(values=brewer.pal(6,"Set1")) 
 nmdsType
 
-### Outlier samples removed ###
-clean99<-subset_samples(pruCore,!sample_names(pruCore)%in%c("MAa0dF110814EMc.iD506","Ma061817EMc.iD486","MAa0dF110814EMa.iD493","W66B.N","MAa0dF110814EMb.iD449"))
-macroA<-subset_samples(clean99,Taxonomic_ID=="Mdecora") # keep only Macrobdella samples
-dsNMDS2<-macroA #define data for analysis
-mNMDS2<-"wunifrac" # define metric for analysis
-# calculate distances
-distOrd2 = phyloseq::distance(dsNMDS2, method = c(mNMDS2)) # calculate distances
-ord2 = ordinate(dsNMDS2, method = "PCoA", distance = distOrd2) # calculate ordination
-# PCoA. May want to change color= , shape= , alpha= , and size=
-nmdsType95<-plot_ordination(dsNMDS2, ord2, color = "Sample_Type") + 
-  geom_point(size=6,mapping = aes(color=Sample_Type)) +
-  ggtitle(c(mNMDS2)) + 
-  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
-  scale_color_manual(values=brewer.pal(6,"Set1")) 
-nmdsType95
-
-##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(nmdsType95), size = "last")), filename="plotNMDStype.png", width=8,height=8)
-##### Figure #####
 
 ########## DaF NMDS ##########
-dsNMDSdaf<-subset_samples(macDaFpr,Sample_Type=="ILF") #define data for analysis
+#dsNMDSdaf<-subset_samples(macDaFpr,Sample_Type=="Intestinum") #define data for analysis
+sample_data(macDaF)$Da1F = factor(sample_data(macDaF)$Da1F, levels = c(0,1,2,4,7,30,31,35,100,113,215)) # Reorder Da1F
+dsNMDSdaf<-macDaF
 mNMDSdaf<-"unifrac" # define metric for analysis
 # calculate distances
 distOrdDaf = phyloseq::distance(dsNMDSdaf, method = c(mNMDSdaf)) # calculate distances
@@ -64,7 +48,7 @@ OrdDaf = ordinate(dsNMDSdaf, method = "PCoA", distance = distOrdDaf) # calculate
 nmdsDaF<-plot_ordination(dsNMDSdaf, OrdDaf, color = "Da1F") + 
   geom_point(size=6,mapping = aes(color=Da1F)) +
   ggtitle(c(mNMDSdaf)) + 
-  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
+  stat_ellipse(type = "t", level = 0.5, linetype = 2) +
   scale_color_manual(values=rainbow) 
 nmdsDaF
 
@@ -74,7 +58,8 @@ ggsave(grid.draw(rbind(ggplotGrob(nmdsDaF), size = "last")), filename="plotNMDSd
 
 
 ########## Macrobdella Sample_Type/AnimalSource NMDS ##########
-macroBase<-subset_samples(phyBase,Taxonomic_ID=="Mdecora")
+macroBase<-subset_samples(macDaF,Taxonomic_ID=="Mdecora")
+#macroBaseD<-subset_samples(macroBase,!Da1F=="0")
 macroBaseI<-subset_samples(macroBase,Sample_Type%in%c("ILF","Intestinum"))
 DistBC = phyloseq::distance(macroBaseI, method = "unifrac") # calculate distances
 ordBC = ordinate(macroBaseI, method = "PCoA", distance = DistBC) # calculate ordination
