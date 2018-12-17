@@ -39,56 +39,84 @@ genus.color<-c(Aeromonas="#267326",Aeromonas2="#39ac39",
                Nubsella="#9a0066",Cetobacterium="#ffe6f7",Fusobacterium="#ff4ec5",
                other="#808080") 
 
-pbar.DaF <- ggplot(dt.DaF, aes(x=Sample,y=Abundance, fill=Genus3)) + 
+pBar.DaF <- ggplot(dt.DaF, aes(x=Sample,y=Abundance, fill=Genus3)) + 
   geom_bar(aes(), stat="identity", position="stack") +
   facet_grid(Sample_Type~AnimalSource+Da1F, scales="free_x",space="free") +
   theme(text=element_text(size=10),axis.text.x=element_text(angle=90),axis.title.x=element_blank()) +
   scale_fill_manual(values=genus.color)
-pbar.DaF # print plot
+pBar.DaF # print plot
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(pbar.DaF), size = "last")), filename="Plots/plotBarStack_Da1F.png", width=12,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(pBar.DaF), size = "last")), filename="Plots/plotBarStack_Da1F.png", width=12,height=8)
 
 
 ### Macrobdella DaF ILF only
 phyT.mdDaFILF<-subset_samples(phyT.mdDaF,Sample_Type%in%c("ILF")) # Keep only ILF samples
 phyT.mdDaFgr<-subset_samples(phyT.mdDaFILF,AnimalSource=="GrotonMA")
-macILFpr<-prune_taxa(taxa_sums(phyT.mdDaFgr)>.01,phyT.mdDaFgr) # keep taxa with at least 1% of 1 sample
-macILFfam<-subset_taxa(macILFpr, Family%in%c("Aeromonadaceae","Bacteroidaceae","Ruminococcaceae","unk_Clostridiales"))
-sample_data(macILFfam)$Da1F = factor(sample_data(macILFfam)$Da1F, levels = c(0,1,2,4,7,30,31,35,113,215)) # Reorder Da1F
+phyT.mdILFpr<-prune_taxa(taxa_sums(phyT.mdDaFgr)>.001,phyT.mdDaFgr) # keep taxa with at least 1% of 1 sample
+phyT.mdILFfam<-subset_taxa(phyT.mdILFpr, taxa_names(phyT.mdILFpr)%in%c(ls.coreMd))
+sample_data(phyT.mdILFfam)$Da1F = factor(sample_data(phyT.mdILFfam)$Da1F, levels = c(0,1,4,7,30,31,35,113,215)) # Reorder Da1F
 # Convert phyloseq to data table
-dt.ILF<-data.table(psmelt(macILFfam))
+dt.ILF<-data.table(psmelt(phyT.mdILFfam))
 dt.ILF$Number0o<-as.character(dt.ILF$Number)
 dt.ILF$Genus2<-as.character(dt.ILF$Genus2)
-dt.ILF[!dt.ILF$Number%in%as.character(ls.coreTot),]$Genus2<-" "
+dt.ILF[!dt.ILF$Number%in%as.character(ls.coreMd),]$Genus2<-" "
 # Make plot
-pbar.DaFilf <- ggplot(dt.ILF, aes(x=Sample, y=Abundance, fill=Genus2)) + 
+pBar.DaFilf <- ggplot(dt.ILF, aes(x=Sample, y=Abundance, fill=Genus2)) + 
   geom_bar(aes(), stat="identity", position="stack") +
-  facet_grid(Order~Da1F, scales="free_x",space="free") +
+  facet_grid(Family~Da1F, scales="free_x",space="free") +
   theme(text=element_text(size=10),axis.text.x=element_text(angle=90),axis.title.x=element_blank()) +
   scale_fill_manual(values=pairBiome)
-pbar.DaFilf # print plot
+pBar.DaFilf # print plot
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(pbar.DaFilf), size = "last")), filename="Plots/plotBar_Da1FILF.png", width=12,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(pBar.DaFilf), size = "last")), filename="Plots/plotBar_DaFILF.png", width=12,height=8)
+
+
+
+phyT.mdILFblad<-subset_taxa(phyT.mdILFpr, taxa_names(phyT.mdILFpr)%in%c(setdiff(ls.coreMdBlad,ls.coreMdILF)))
+
+sample_data(phyT.mdILFblad)$Da1F = factor(sample_data(phyT.mdILFblad)$Da1F, levels = c(0,1,4,7,30,31,35,113,215)) # Reorder Da1F
+
+# Convert phyloseq to data table
+dt.mdILFblad<-data.table(psmelt(phyT.mdILFblad))
+dt.mdILFblad$Number0o<-as.character(dt.mdILFblad$Number)
+dt.mdILFblad$Genus2<-as.character(dt.mdILFblad$Genus2)
+dt.mdILFblad[!dt.mdILFblad$Number%in%as.character(ls.coreMd),]$Genus2<-" "
+# Make plot
+pBar.DaFilfBlad <- ggplot(dt.mdILFblad, aes(x=Sample, y=Abundance, fill=Genus2)) + 
+  geom_bar(aes(), stat="identity", position="stack") +
+  facet_grid(Family~Da1F, scales="free_x",space="free") +
+  theme(text=element_text(size=10),axis.text.x=element_text(angle=90),axis.title.x=element_blank()) +
+  scale_fill_manual(values=pairBiome)
+pBar.DaFilfBlad # print plot
+
+
+
+
+
+
+
+
+
 
 ### Macrobdella DaF Intestinum only
 phyT.mdDaFInt<-subset_samples(phyT.mdDaF,Sample_Type%in%c("Intestinum")) # Keep only Intestinum samples
-macIntpr<-prune_taxa(taxa_sums(phyT.mdDaFInt)>.01,phyT.mdDaFInt) # keep taxa with at least 1% of 1 sample
-macIntFam<-subset_taxa(macIntpr, Family%in%c("Aeromonadaceae","Bacteroidaceae","Ruminococcaceae","unk_Clostridiales"))
-sample_data(macIntFam)$Da1F = factor(sample_data(macIntFam)$Da1F, levels = c(0,1,2,4,7,30,31,35,113,215)) # Reorder Da1F
+phyT.mdDaFpr<-prune_taxa(taxa_sums(phyT.mdDaFInt)>.01,phyT.mdDaFInt) # keep taxa with at least 1% of 1 sample
+phyT.mdDaFcore<-subset_taxa(phyT.mdDaFpr, taxa_names(phyT.mdDaFpr)%in%c(ls.coreFeedInt))
+sample_data(phyT.mdDaFcore)$Da1F = factor(sample_data(phyT.mdDaFcore)$Da1F, levels = c(0,1,2,4,7,30,31,35,113,215)) # Reorder Da1F
 # Convert phyloseq to data table
-dt.Int<-data.table(psmelt(macIntFam))
+dt.Int<-data.table(psmelt(phyT.mdDaFcore))
 dt.Int$Number<-as.character(dt.Int$Number)
 dt.Int$Genus<-as.character(dt.Int$Genus2)
 dt.Int[!dt.Int$Number%in%as.character(ls.coreTot),]$Genus2<-" "
 # Make plot
-pbar.DaFint <- ggplot(dt.Int, aes(x=Sample,y=Abundance, fill=Genus2)) + 
+pBar.DaFint <- ggplot(dt.Int, aes(x=Sample,y=Abundance, fill=Genus2)) + 
   geom_bar(aes(), stat="identity", position="stack") +
-  facet_grid(Order~Da1F, scales="free_x",space="free") +
+  facet_grid(Family~Da1F, scales="free_x",space="free") +
   theme(text=element_text(size=10),axis.text.x=element_text(angle=90),axis.title.x=element_blank()) +
-  scale_fill_manual(values=pairBiome)
-pbar.DaFint # print plot
+  scale_fill_manual(values=brewer.pal(9,"Set1"))
+pBar.DaFint # print plot
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(pbar.DaFint), size = "last")), filename="Plots/plotBar_Da1FInt.png", width=12,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(pBar.DaFint), size = "last")), filename="Plots/plotBar_DaFInt.png", width=12,height=8)
 ##### Table #####
 write.table(sample_data(phyT.core.mdDaF), "tableTax_Da1F.csv", sep=",")
 
@@ -98,8 +126,8 @@ write.table(sample_data(phyT.core.mdDaF), "tableTax_Da1F.csv", sep=",")
 library(grid)
 library(gtable)
 
-phyT.bwdat<-subset_samples(phyT.mdDaFILF,Da1F!="2")
-sample_data(phyT.bwdat)$Da1F = factor(sample_data(phyT.bwdat)$Da1F, levels = c(0,1,2,4,7,30,100)) # Reorder Da1F
+phyT.bwdat<-phyT.mdDaFILF 
+sample_data(phyT.bwdat)$Da1F = factor(sample_data(phyT.bwdat)$Da1F, levels = c(0,1,4,7,30,100)) # Reorder Da1F
 phyT.bwdatP<-prune_taxa(c(ls.coreMdILF),phyT.bwdat) # keep only core ILF taxa (box+whisker data pruned)
 phyT.bwdatPmer<-tax_glom(phyT.bwdatP,"Genus2")
 ls.bwGen<-as.character(get_taxa_unique(phyT.bwdatPmer, "Genus2")) # compile list of genera to examine (box + whisker genera)
@@ -174,8 +202,8 @@ ggsave(grid.draw(rbind(ggplotGrob(pbox.ProtILF), size = "last")), filename="Plot
 
 #### INTESTINUM #####
 ### Box + whisker ###
-phyT.bwdat<-subset_samples(phyT.mdDaFInt,Da1F!="2")
-sample_data(phyT.bwdat)$Da1F = factor(sample_data(phyT.bwdat)$Da1F, levels = c(0,1,2,4,7,30,100)) # Reorder Da1F
+phyT.bwdat<-phyT.mdDaFInt
+sample_data(phyT.bwdat)$Da1F = factor(sample_data(phyT.bwdat)$Da1F, levels = c(0,1,4,7,30,100)) # Reorder Da1F
 phyT.bwdatP<-prune_taxa(c(ls.coreMdInt),phyT.bwdat) # keep only core ILF taxa (box+whisker data pruned)
 phyT.bwdatPmer<-tax_glom(phyT.bwdatP,"Genus2")
 
@@ -252,4 +280,8 @@ ggsave(grid.draw(rbind(ggplotGrob(pbox.ProtInt), size = "last")), filename="Plot
 
 
 
-#################################
+###############################################
+################ Practice area ################ 
+############################################### 
+
+

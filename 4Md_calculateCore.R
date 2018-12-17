@@ -3,7 +3,7 @@ ls.taxaDC <- setdiff(taxa_names(phyT.Tform), taxa_names(phyR.allc)) # find the d
 phyT.DC <- prune_taxa(ls.taxaDC, phyT.Tform) # keep only taxa not in taxaNC (physeq decontam)
 
 phyT.Adult<-subset_samples(phyT.DC,Age=="A") # keep adult samples (prune Adult)
-phyT.Hv<-subset_samples(phyT.DC,Sample_ID%in%c("A042117JGa.b","A042117JGd.b","A042317EMg.b","A042117JGa.i","A042317EMg.i","A042317EMe.u","A042317EMe.i","A042317EMf.u","A042317EMh.u","A042117JGbb","A042317EMi","A042317EMj","A042317EMj.b","A042317EMj.i","A042317EMj.u","A042317EMk","A042317EMk.b","A042317EMk.i","A043017EMl","A043017EMm.u","A42hF050317EMb","A050217EMo","A050217EMo.u","A050217EMr.i","A0dF091814EMa","A0dF091814EMb"))
+phyT.Hv<-subset_samples(phyT.DC,Sample_ID%in%c("A042117JGa.b","A042117JGd.b","A042317EMg.b","A042117JGa.i","A042317EMg.i","A042317EMe.u","A042317EMe.i","A042317EMf.u","A042317EMh.u","A042117JGbb","A042317EMi","A042317EMj","A042317EMj.b","A042317EMj.i","A042317EMj.u","A042317EMk","A042317EMk.b","A042317EMk.i","A043017EMl","A043017EMm.u","A42hF050317EMb","A050217EMo","A050217EMo.u","A050217EMr.i"))
 phyT.Md<-subset_samples(phyT.Adult,Taxonomic_ID%in%c("Mdecora","Unk")) # subset containing only Macrobdella samples
 phyT.mdCT<-subset_samples(phyT.Md,AnimalSource=="Wlot") # subset containing only W-lot samples (CT Macrobdella)
 phyT.mdMA<-subset_samples(phyT.Md,AnimalSource=="GrotonMA") # subset containing only MA samples (MA Macrobdella)
@@ -11,7 +11,7 @@ phyT.mdNY<-subset_samples(phyT.Md,AnimalSource=="CarogaNY") # subset containing 
 phyT.mdVT<-subset_samples(phyT.Md,AnimalSource=="MtSnowVT") # subset containing only VT samples (VT Macrobdella)
 #phyT.mdSB<-subset_samples(phyT.Md,AnimalSource=="Schoolhouse_Brook") # subset containing only Schoolhouse Brook samples (VT Macrobdella)
 
-cMin<-0.002 # define minimum to count prevalence in a sample
+cMin<-0.001 # define minimum to count prevalence in a sample
 
 ### Hirudo ###
 phyT.hvBlad<-subset_samples(phyT.Hv,Sample_Type=="Bladder") # (Hirudo verbana bladder)
@@ -174,6 +174,8 @@ ls.coreMdILF = prevdt.mdILF[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdIL
 ls.coreMdInt = prevdt.mdInt[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Intestinum
 ls.coreMdBlad = prevdt.mdBlad[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Bladder
 ls.coreMd = unique(c(ls.coreCT,ls.coreMA,ls.coreNY)) # removed ls.coreVT due to this being only 1 sample
+ls.coreFeedILF = unique(c(ls.coreCtILF,ls.coreMaILF))
+ls.coreFeedInt = unique(c(ls.coreCtInt,ls.coreMaInt))
 ls.coreTot = unique(c(ls.coreMd,ls.coreHv,ls.coreCT,ls.coreMA,ls.coreNY)) # removed ls.coreVT due to this being only 1 sample
 
 ############################
@@ -220,16 +222,16 @@ ls.comTot = unique(c(ls.comMd,ls.comHv,ls.comCT,ls.comMA,ls.comNY)) # removed ls
 ##### Core plot #####
 phyT.Md2<-subset_samples(phyT.Md,Da1F%in%c("0","1","31"))
 phyT.Md1<-subset_samples(phyT.Md2,Sample_Type!="Bladder")
-phyCon<-merge_phyloseq(phyT.Md1,phyT.Hv) # merge Macrobdella and Hirudo phyloseq objects (physeq control)
-phyBIU<-subset_samples(phyCon,!Sample_Type%in%c("Ovary")) # remove ovary samples (physeq bladder, ILF, intestinum) 
+phyT.Con<-merge_phyloseq(phyT.Md1,phyT.Hv) # merge Macrobdella and Hirudo phyloseq objects (physeq control)
+phyT.BIU<-subset_samples(phyT.Con,!Sample_Type%in%c("Ovary")) # remove ovary samples (physeq bladder, ILF, intestinum) 
 
-#phyBase<-subset_samples(phyBIU,Da1F%in%c("0","2","35","99","101","108","110")) # remove days after feeding data to leave 0DaF and 5w (physeq base)
-phyT.Base<-merge_phyloseq(phyBIU,phyT.mdBlad)
-phyBasC<-subset_samples(phyT.Base,!Sample_ID%in%c("Ma5wF082117EMa.i","Ma5wF082117EMa.u","Ma5wF082117EMb.i","Ma5wF082117EMb.u","Ma5wF082117EMc.i","Ma5wF082117EMc.u")) # Remove ILF and intestinum samples from 5wF (physeq base clean)
+#phyBase<-subset_samples(phyT.BIU,Da1F%in%c("0","35","99","101","108","110")) # remove days after feeding data to leave 0DaF and 5w (physeq base)
+phyT.Base<-merge_phyloseq(phyT.BIU,phyT.mdBlad)
+phyT.BasC<-subset_samples(phyT.Base,!Sample_ID%in%c("Ma5wF082117EMa.i","Ma5wF082117EMa.u","Ma5wF082117EMb.i","Ma5wF082117EMb.u","Ma5wF082117EMc.i","Ma5wF082117EMc.u")) # Remove ILF and intestinum samples from 5wF (physeq base clean)
 
 ### Add new column to map data. 'Header' column will be used for pCore figure
-MAPcore<-sample_data(phyBasC) # pull map data from phyloseq object
-MAPcore$Header<-with(MAPcore,
+map.core<-sample_data(phyT.BasC) # pull map data from phyloseq object
+map.core$Header<-with(map.core,
   ifelse(AnimalSource=="USA","USA",
   ifelse(AnimalSource=="BBEZ","Germany",
   ifelse(AnimalSource=="GrotonMA","MA",
@@ -239,13 +241,15 @@ MAPcore$Header<-with(MAPcore,
   ifelse(AnimalSource=="Schoolhouse_Brook","CT",     
   as.character(AnimalSource)))))))))
 
-phyT.core = merge_phyloseq(phyBasC,MAPcore) # return map data to the phyloseq object (Core phyloseq)
-#coreTab<-prune_taxa(ls.coreTot,phyT.core) # keep only taxa from the identified 'Core' 
+phyT.core = merge_phyloseq(phyT.BasC,map.core) # return map data to the phyloseq object (Core phyloseq)
 
 ########## Macrobdella Sites plot with 'Other' category ##########
-matCore <- sort(taxa_sums(phyT.core), TRUE)[1:35] # Identify 27 most abundant taxa
-pruCore <- prune_taxa(names(matCore),phyT.core) # Create a subset of data including only 27 most abundant taxa
-plot_bar(pruCore,fill="Number") + facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") + scale_fill_manual(values=pairBiome)
+mat.core <- sort(taxa_sums(phyT.core), TRUE)[1:35] # Identify 27 most abundant taxa
+phyT.corePru <- prune_taxa(names(mat.core),phyT.core) # Create a subset of data including only 27 most abundant taxa
+pBar.matCore <- plot_bar(phyT.corePru,fill="Family") + 
+  facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") + 
+  scale_fill_manual(values=pairBiome)
+pBar.matCore
 
 dt.core<-data.table(psmelt(phyT.core))
 dt.core$Genus3<-with(dt.core,
@@ -271,14 +275,14 @@ genus.color<-c(Aeromonas="#267326",Aeromonas2="#39ac39",
                Nubsella="#9a0066",Cetobacterium="#ffe6f7",Fusobacterium="#ff4ec5",
                other="#808080") 
 ##### Plot #####
-pbar.Core <- ggplot(dt.core, aes(x=Replicate,y=Abundance, fill=Genus3)) + 
+pBar.Core <- ggplot(dt.core, aes(x=Replicate,y=Abundance, fill=Genus3)) + 
   geom_bar(aes(), stat="identity", position="stack") +
   facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") +
   theme(text=element_text(size=10), axis.text.x=element_text(angle=90),axis.title.x=element_blank()) +
   scale_fill_manual(values=genus.color)
-pbar.Core # print plot
+pBar.Core # print plot
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(pbar.Core), size = "last")), filename="Plots/plotBarStack_Core.png", width=12,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(pBar.Core), size = "last")), filename="Plots/plotBarStack_Core.png", width=12,height=8)
 ##### Table #####
 write.table(tax_table(phyT.core), "tableTax_Core.csv", sep=",")
 write.table(dt.core,"table_dtCore.csv",sep=",")
@@ -294,10 +298,12 @@ prevdt.nonCore = fm.nonCore[, list(Prevalence = sum(count >= cMin),
 ls.hiNonCore = prevdt.nonCore[(MaxCount >= .01), TaxaID] # Make list of OTUs present in more than 2 samples and having at least maxNeg reads in at least one sample (list.high prevalence)
 phyT.pruNonCore <- prune_taxa(ls.hiNonCore,phyT.nonCore) # remove identified taxa from phyloseq object (physeq.Pruned 2)
 ##### Plot #####
-pbar.nonCore<-plot_bar(phyT.pruNonCore,x="Replicate",fill="Genus2") + facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") + scale_fill_manual(values=pairBiome)
-pbar.nonCore
+pBar.nonCore<-plot_bar(phyT.pruNonCore,x="Replicate",fill="Genus2") + 
+  facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") + 
+  scale_fill_manual(values=pairBiome)
+pBar.nonCore
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(pbar.nonCore), size = "last")), filename="Plots/plotBarStack_nonCore.png", width=12,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(pBar.nonCore), size = "last")), filename="Plots/plotBarStack_nonCore.png", width=12,height=8)
 ##### Table #####
 write.table(tax_table(phyT.pruNonCore), "tableTax_nonCore.csv", sep=",")
 
@@ -305,8 +311,8 @@ write.table(tax_table(phyT.pruNonCore), "tableTax_nonCore.csv", sep=",")
 ### Add core columns to taxa table ###
 phyT.coreTot<-prune_taxa(ls.coreTot,phyT.core) # keep only taxa from the identified 'Core' 
 tax.core<-tax_table(phyT.coreTot) # pull taxonomy data from phyloseq object
-dt.taxCore<-as.data.table(tax.core) # Change taxa_table to a data.table
-dt.taxCore$Number<-as.character(dt.taxCore$Number) # force TAXcore$Number to be a character
+taxdt.Core<-as.data.table(tax.core) # Change taxa_table to a data.table
+taxdt.Core$Number<-as.character(taxdt.Core$Number) # force TAXcore$Number to be a character
 
 # Macrobdella core data
 taxdt.mdInt<-as.data.table(ls.coreMdInt)
@@ -335,26 +341,19 @@ taxdt.hvBlad$Hv.Bladder<-"x"
 setnames(taxdt.hvBlad,"ls.coreHvBlad", "Number") # First column = OTU names. Change 
 
 # Merge tables
-ls.taxdt <- list(dt.taxCore,taxdt.mdILF,taxdt.mdInt,taxdt.mdBlad,taxdt.hvILF,taxdt.hvInt,taxdt.hvBlad) # list of data.tables to merge (list of taxonomy data.tables)
+ls.taxdt <- list(taxdt.Core,taxdt.mdILF,taxdt.mdInt,taxdt.mdBlad,taxdt.hvILF,taxdt.hvInt,taxdt.hvBlad) # list of data.tables to merge (list of taxonomy data.tables)
 lapply(ls.taxdt, function(i) setkey(i, Number)) # set key for merge function
-TAXcore2 <- Reduce(function(...) merge(..., all = T), ls.taxdt) # merge list of data.tables, keeping values even if not present in each table (Taxonomy table core 2)
-TAXcore2[is.na(TAXcore2)] <- "" # replace <NA> values with empty values
-write.table(TAXcore2, "tableTax_CoreCompile.csv", row.names=FALSE,sep=",") # export table to csv, row names excluded
-### Add core columns to taxa table ###
+dt.TAXcore2 <- Reduce(function(...) merge(..., all = T), ls.taxdt) # merge list of data.tables, keeping values even if not present in each table (Taxonomy table core 2)
+dt.TAXcore2[is.na(dt.TAXcore2)] <- "" # replace <NA> values with empty values
+write.table(dt.TAXcore2, "tableTax_CoreCompile.csv", row.names=FALSE,sep=",") # export table to csv, row names excluded
 
 
-
-
-
-
-
-########## Print table of core taxa with columns indicating which sample type each is present in ##########
-########## Print table of core taxa with columns indicating which sample type each is present in ##########
+########## Print table of common taxa with columns indicating which sample type each is present in ##########
 ### Add core columns to taxa table ###
 phyT.comTot<-prune_taxa(ls.comTot,phyT.core) # keep only taxa from the identified 'Core' 
 tax.com<-tax_table(phyT.comTot) # pull taxonomy data from phyloseq object
-dt.taxcom<-as.data.table(tax.com) # Change taxa_table to a data.table
-dt.taxcom$Number<-as.character(dt.taxcom$Number) # force TAXcom$Number to be a character
+taxdt.Com<-as.data.table(tax.com) # Change taxa_table to a data.table
+taxdt.Com$Number<-as.character(taxdt.Com$Number) # force TAXcom$Number to be a character
 
 # Macrobdella core data
 taxdt.mdInt<-as.data.table(ls.comMdInt)
@@ -385,9 +384,9 @@ setnames(taxdt.hvBlad,"ls.comHvBlad", "Number") # First column = OTU names. Chan
 # Merge tables
 ls.taxdt <- list(dt.taxcom,taxdt.mdILF,taxdt.mdInt,taxdt.mdBlad,taxdt.hvILF,taxdt.hvInt,taxdt.hvBlad) # list of data.tables to merge (list of taxonomy data.tables)
 lapply(ls.taxdt, function(i) setkey(i, Number)) # set key for merge function
-TAXcom2 <- Reduce(function(...) merge(..., all = T), ls.taxdt) # merge list of data.tables, keeping values even if not present in each table (Taxonomy table core 2)
-TAXcom2[is.na(TAXcom2)] <- "" # replace <NA> values with empty values
-write.table(TAXcom2, "tableTax_comCompile.csv", row.names=FALSE,sep=",") # export table to csv, row names excluded
+dt.TAXcom2 <- Reduce(function(...) merge(..., all = T), ls.taxdt) # merge list of data.tables, keeping values even if not present in each table (Taxonomy table core 2)
+dt.TAXcom2[is.na(dt.TAXcom2)] <- "" # replace <NA> values with empty values
+write.table(dt.TAXcom2, "tableTax_comCompile.csv", row.names=FALSE,sep=",") # export table to csv, row names excluded
 ### Add core columns to taxa table ###
 
 

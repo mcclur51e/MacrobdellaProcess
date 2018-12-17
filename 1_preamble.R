@@ -9,6 +9,7 @@ library("data.table") #packageVersion("data.table")
 library("RColorBrewer") # design new color palette for data
 library("grid")
 library("vegan")
+library("decontam") # identify contaminant OTUs 
 #library("plyr") # may need to turn back 'on' and dplyr 'off'
 library("dplyr")
 ### Call functions for use ###
@@ -40,12 +41,12 @@ physeq = phyloseq(OTU, TAX, MAP,TREE)
 save(physeq,file=("DataFiles/physeq_current.RData")) # Save the phyloseq data object in a .RData file 
 ########## Remove duplicate samples from physeq ##########
 ls.dups<-as.character(read.csv("DataFiles/list_dups.csv",header=FALSE,sep=",")$V1) # Import list of samples determined to be duplicates. Last evaluated 2018-11-22. (list.duplicates)
-phy.sin<-subset_samples(physeq, !sample_names(physeq)%in%c(ls.dups))# Remove duplicates from list (physeq.single)
-save(phy.sin,file=("DataFiles/physeq_noDups.RData")) # Save phy.sin in a .RData file 
+phyR.sin<-subset_samples(physeq, !sample_names(physeq)%in%c(ls.dups))# Remove duplicates from list (physeq.single)
+save(phyR.sin,file=("DataFiles/physeq_noDups.RData")) # Save phyR.sin in a .RData file 
 ########## Remove outlier samples identified in list_ouliers.csv ##########
 ls.outliers<-as.character(read.csv("DataFiles/list_outliers.csv",header=FALSE,sep=",")$V1) # Import list of samples determined to be duplicates. Last evaluated 2018-11-22. (list.duplicates)
-phy.sin<-subset_samples(phy.sin,!sample_names(physeq)%in%c(ls.outliers)) # Remove outliers
-save(phy.sin,file=("DataFiles/physeq_noOutliers.RData")) # Save phy.sin in a .RData file 
+phyR.sin<-subset_samples(phyR.sin,!sample_names(phyR.sin)%in%c(ls.outliers)) # Remove outliers
+save(phyR.sin,file=("DataFiles/physeq_noOutliers.RData")) # Save phyR.sin in a .RData file 
 
 ########## Load most recent data ##########
 ### Use this to skip lines 35--48 if the basic phyloseq data sets have previously been produced and saved ###
