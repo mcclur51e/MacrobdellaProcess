@@ -6,8 +6,7 @@ phyR.Md<-subset_samples(phyR.sin,Taxonomic_ID%in%c("Mdecora")) # subset containi
 phyR.Hv<-subset_samples(phyR.sin,Sample_ID%in%c("A042117JGa.b","A042117JGd.b","A042317EMg.b","A042117JGa.i","A042317EMg.i","A042317EMe.u","A042317EMe.i","A042317EMf.u","A042317EMh.u","A042117JGbb","A042317EMi","A042317EMj","A042317EMj.b","A042317EMj.i","A042317EMj.u","A042317EMk","A042317EMk.b","A042317EMk.i","A043017EMl","A043017EMm.u","A42hF050317EMb","A050217EMo","A050217EMo.u","A050217EMr.i","A0dF091814EMa","A0dF091814EMb"))
 ls.PCRnegDates<-intersect(sample_data(phyR.Md)$csv_PCRDate,sample_data(phyR.PCRneg)$csv_PCRDate) # create list of dates on which PCR negative controls were run with samples of interest
 phyR.trim.PCRneg<-subset_samples(phyR.PCRneg,csv_PCRDate%in%c(ls.PCRnegDates)) # restrict PCR negative samples to only those from ls.PCRnegDates
-ls.mat.PCRneg <- sort(taxa_sums(phyR.trim.PCRneg), TRUE)[1:30] # Identify 30 most abundant taxa
-phyR.mat.PCRneg <- prune_taxa(names(ls.mat.PCRneg),phyR.trim.PCRneg) # Create a subset of data including only most abundant taxa
+phyR.mat.PCRneg <- prune_taxa(names(sort(taxa_sums(phyR.trim.PCRneg),TRUE)[1:30]),phyR.trim.PCRneg) # Create a subset of data including only (30) most abundant taxa
 
 ### Plot ###
 pbar.PCRneg<-plot_bar(phyR.mat.PCRneg,x="EmilyID",fill="Genus") +
@@ -25,7 +24,7 @@ var.maxNeg <- max(otu_table(phyR.taxaNeg)) # find the greatest count of any OTU 
 var.meanNeg <- mean(otu_table(phyR.taxaNeg)) # find the median count of any OTU in a single sample
 
 ########## Identify 'contaminant' OTUs  ##########
-##### Copied from deontam vignette #####
+##### Copied (and slightly modified) from deontam vignette #####
 #library("decontam") # should already be loaded
 dir.create("NegControls/Decontam",showWarnings = FALSE) # create folder for data output(s)
 ### Trim unuseable samples ###
@@ -113,43 +112,9 @@ pbar.Contam # print plot
 ggsave(grid.draw(rbind(ggplotGrob(pbar.Contam), size = "last")), filename="Plots/plotBarStack_Contaminants.png", width=16,height=8)
 
 
+
+
+
 ##############################
 ### Temporary Testing Area ###
 ##############################
-bbb<-transform_sample_counts(phy.10min, function(x) x/sum(x)) # transform raw counts to fraction (physeq.Transform)
-aaa<-subset_samples(bbb,sample_names(bbb)%in%c(sample_names(phyR.allc)))
-aaaCon<- prune_taxa(taxa_names(phy.contamFreq), aaa) # (physeq all contaminants)
-aaaMer<-tax_glom(aaaCon,taxrank="Genus")
-
-list.mat.A <- sort(taxa_sums(phyR.allc), TRUE)[1:35] # Identify most abundant contaminating taxa
-phy.mat.A <- prune_taxa(names(list.mat.A),phyR.allc) # Create a subset of data including only most abundant taxa
-
-plot_bar(phy.mat.A,x="EmilyID",fill="Number") +
-  theme(text=element_text(size=10), axis.title.x=element_blank())  +
-  scale_fill_manual(values=pairBiome)
-
-plot_bar(phyR.allcMer,x="EmilyID",fill="Genus") +
-  theme(text=element_text(size=10), axis.title.x=element_blank()) +
-  scale_fill_manual(values=pairBiome)
-
-
-
-
-
-
-# 2018-12-11
-phyT.work<-merge_phyloseq(phyT.Md,phyT.Hv) # merge Macrobdella and Hirudo phyloseq objects (physeq control)
-phyT.10min<-transform_sample_counts(phyR.10min, function(x) x/sum(x)) # transform raw counts to fraction (physeq.Transform)
-
-phyT.clDecontam<-prune_taxa(taxa_names(phyT.10min)%in%c(setdiff(taxa_names(phyT.Tform),taxa_names(phyR.nc))),phyT.10min)
-phyT.workDecontam<-subset_samples(phyT.clDecontam,sample_names(phyT.clDecontam)%in%c(sample_names(phyT.work)))
-plot_bar(phyT.workDecontam, fill="Genus2")  +
-  scale_fill_manual(values=pairBiome)
-
-phyT.clEmily<-prune_taxa(taxa_names(phyT.10min)%in%c(setdiff(taxa_names(phyR.nc),taxa_names(phyT.Tform))),phyT.10min)
-phyT.workEmily<-subset_samples(phyT.clEmily,sample_names(phyT.clEmily)%in%c(sample_names(phyT.work)))
-phyT.aaa<-prune_taxa(names(sort(taxa_sums(phyT.workEmily), TRUE)[5:15]),phyT.workEmily)
-plot_bar(phyT.aaa, fill="Genus2") + 
-  facet_grid(Family~Taxonomic_ID, scales="free_x",space="free") +
-  theme(text=element_text(size=10), axis.text.x=element_blank(),axis.title.x=element_blank()) +
-  scale_fill_manual(values=pairBiome)

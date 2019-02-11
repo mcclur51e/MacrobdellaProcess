@@ -12,23 +12,40 @@ library("vegan")
 library("decontam") # identify contaminant OTUs 
 #library("plyr") # may need to turn back 'on' and dplyr 'off'
 library("dplyr")
+library("pairwiseAdonis") # for PERMANOVA calculations
+
 ### Call functions for use ###
 source("~/Masters/R_tools/taxa_summary",local=TRUE) # load fast_melt function
+gm_mean = function(x, na.rm=TRUE){
+  exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
+}
+plot.median <- function(x) {
+  m <- median(x)
+  c(y = m, ymin = m, ymax = m)
+}
 ########## Processing Set-up ##########
 #Green,Red,Blue,Orange,Purple,Yellow,Teal,Magenta,Grey
-pairBiome<-c("#004200","#267326","#39ac39","#b3e6b3",
+pairBiome<-c("#1c541c","#2f8f2f","#49c349","#bfeabf",
              "#B80000","#F00000","#FF7777","#ffcccc",
              "#000080","#0000cd","#8282ff","#cfcfff",
-             "#b34700","#ff6600","#ff9933","#ffcc99",
-             "#600080","#ac00e6","#e599ff","#f2ccff",
-             "#cccc00","#ffff00","#ffffb3",
-             "#0090b4","#01cdff","#80e6ff","#ccf5ff",
-             "#9a0066","#ff4ec5","#ff9ade","#ffe6f7",
+             "#623800","#c47000","#ff9914","#ffddb1",
+             "#430059","#7d00a7","#cc32ff","#eebbff",
+             "#626200","#c4c400","#ffff14","#ffffb1",
+             "#005f6c","#00a4bb","#1ee3ff","#bbf7ff",
+             "#750063","#c400a5","#ff13da","#ffb0f3",
              "#1a1a1a","#808080","#d9d9d9","#ffffff","#808080")
+pairMini<-c("#A6CEE3","#1F78B4",
+            "#B2DF8A","#33A02C",
+            "#FB9A99","#E31A1C",
+            "#FDBF6F","#FF7F00",
+            "#CAB2D6","#6A3D9A",
+            "#FFFF99","#eded09",
+            "#9aebff","#01cdff",
+            "#e6e6e6","#c0c0c0")
 rainbow<-c("#ff00aa","#ac00e6","#3333ff","#0ba29a","#39ac39","#ffff00","#ff9933","#F00000","#800055")
 
-########## Set working directory where processing will be carried out. MAke subdirectories for saving into ##########
-setwd("~/Desktop/Rprocess_2018_1130/") # set working directory for data processing. Must contain folder "DataFiles" containing "table_otu.csv", "table_tax.csv", and "table_map.csv" and/or "physeq_manuscript.RData"
+########## Set working directory where processing will be carried out. Make subdirectories for saving into ##########
+setwd("~/Dropbox/Manuscript_Macrobdella/Md_processData/") # set working directory for data processing. Must contain folder "DataFiles" containing "table_otu.csv", "table_tax.csv", and "table_map.csv" and/or "physeq_manuscript.RData"
 dir.create("NegControls",showWarnings = FALSE) # create folder for negative control data output(s)
 dir.create("NMDS",showWarnings = FALSE) # create folder for NMDS data output(s)
 dir.create("Plots",showWarnings = FALSE) # create folder for plot output(s)

@@ -7,7 +7,7 @@
 import pandas as pd
 import sys
 
-ttt = pd.read_csv(sys.argv[1],skiprows=1,header=None,index_col=False,sep="\t",nrows=25)
+ttt = pd.read_csv(sys.argv[1],skiprows=1,header=None,index_col=False,sep="\t",dtype=object)
 
 ttt.iat[0,0] = ""
 ttt_OTU = ttt.drop(ttt.columns[len(ttt.columns)-1], axis=1)

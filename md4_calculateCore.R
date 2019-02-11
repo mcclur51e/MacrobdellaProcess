@@ -3,13 +3,14 @@ ls.taxaDC <- setdiff(taxa_names(phyT.Tform), taxa_names(phyR.allc)) # find the d
 phyT.DC <- prune_taxa(ls.taxaDC, phyT.Tform) # keep only taxa not in taxaNC (physeq decontam)
 
 phyT.Adult<-subset_samples(phyT.DC,Age=="A") # keep adult samples (prune Adult)
-phyT.Hv<-subset_samples(phyT.DC,Sample_ID%in%c("A042117JGa.b","A042117JGd.b","A042317EMg.b","A042117JGa.i","A042317EMg.i","A042317EMe.u","A042317EMe.i","A042317EMf.u","A042317EMh.u","A042117JGbb","A042317EMi","A042317EMj","A042317EMj.b","A042317EMj.i","A042317EMj.u","A042317EMk","A042317EMk.b","A042317EMk.i","A043017EMl","A043017EMm.u","A42hF050317EMb","A050217EMo","A050217EMo.u","A050217EMr.i"))
+phyT.Hv<-subset_samples(phyT.DC,Sample_ID%in%c("A042117JGa.b","A042117JGd.b","A042317EMg.b","A042117JGa.i","A042317EMg.i","A042317EMe.u","A042317EMe.i","A042317EMf.u","A042317EMh.u","A042117JGbb","A042317EMi","A042317EMj","A042317EMj.b","A042317EMj.i","A042317EMj.u","A042317EMk","A042317EMk.b","A042317EMk.i","A043017EMl","A043017EMm.u","A42hF050317EMb","A050217EMo","A050217EMo.u","A050217EMr.i","A042117JGb.b","A042117JGb","A042317EMi.b","A042317EMi","A043017EMl","A043017EMl.b","A050217EMq"))
 phyT.Md<-subset_samples(phyT.Adult,Taxonomic_ID%in%c("Mdecora","Unk")) # subset containing only Macrobdella samples
 phyT.mdCT<-subset_samples(phyT.Md,AnimalSource=="Wlot") # subset containing only W-lot samples (CT Macrobdella)
 phyT.mdMA<-subset_samples(phyT.Md,AnimalSource=="GrotonMA") # subset containing only MA samples (MA Macrobdella)
 phyT.mdNY<-subset_samples(phyT.Md,AnimalSource=="CarogaNY") # subset containing only NY samples (NY Macrobdella)
 phyT.mdVT<-subset_samples(phyT.Md,AnimalSource=="MtSnowVT") # subset containing only VT samples (VT Macrobdella)
 #phyT.mdSB<-subset_samples(phyT.Md,AnimalSource=="Schoolhouse_Brook") # subset containing only Schoolhouse Brook samples (VT Macrobdella)
+phyT.start<-merge_phyloseq(phyT.Md,phyT.Hv) # merge Macrobdella and Hirudo phyloseq objects (physeq control)
 
 cMin<-0.001 # define minimum to count prevalence in a sample
 
@@ -37,7 +38,9 @@ prevdt.HvILF = fm.hvILF[, list(Prevalence = sum(count >= cMin),
   by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
 ###Macrobdella		
 phyT.mdBlad<-subset_samples(phyT.Md,Sample_Type=="Bladder") # (Hirudo verbana bladder)
-fm.mdBlad = fast_melt(phyT.mdBlad) # (fast melt Hirudo verbana bladder)
+phyT.mdBlad2<-subset_samples(phyT.mdBlad,!Da1F%in%c("1","4","7"))
+phyT.mdBlad3<-subset_samples(phyT.mdBlad2,!sample_names(phyT.mdBlad2)%in%c("MdMA0dF040618EMfBD","MdMA0dF040618EMdBD722","MdMA0dF040618EMeBD"))
+fm.mdBlad = fast_melt(phyT.mdBlad3) # (fast melt Hirudo verbana bladder)
 prevdt.mdBlad = fm.mdBlad[, list(Prevalence = sum(count >= cMin), 
   TotalPer = sum(count),
   MinCount = min(count),
@@ -58,7 +61,7 @@ prevdt.mdILF = fm.mdILF[, list(Prevalence = sum(count >= cMin),
   MaxCount = max(count)),
   by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
 ###CT
-phyT.ctBlad<-subset_samples(phyT.mdCT,Sample_Type=="Bladder") # (Hirudo verbana bladder)
+phyT.ctBlad<-subset_samples(phyT.mdBlad3,AnimalSource=="Wlot") # (Hirudo verbana bladder)
 fm.ctBlad = fast_melt(phyT.ctBlad) # (fast melt Hirudo verbana bladder)
 prevdt.ctBlad = fm.ctBlad[, list(Prevalence = sum(count >= cMin), 
   TotalPer = sum(count),
@@ -80,7 +83,7 @@ prevdt.ctILF = fm.ctILF[, list(Prevalence = sum(count >= cMin),
   MaxCount = max(count)),
   by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence data table Hirudo verbana ILF)
 ###MA
-phyT.maBlad<-subset_samples(phyT.mdMA,Sample_Type=="Bladder") # (Massachusetts bladder)
+phyT.maBlad<-subset_samples(phyT.mdBlad3,AnimalSource=="GrotonMA") # (Massachusetts bladder)
 fm.maBlad = fast_melt(phyT.maBlad) # (fast melt Massachusetts bladder)
 prevdt.maBlad = fm.maBlad[, list(Prevalence = sum(count >= cMin), 
   TotalPer = sum(count),
@@ -152,12 +155,12 @@ ls.coreHv = unique(c(ls.coreHvBlad,ls.coreHvILF,ls.coreHvInt))
 ### CT Macrobdella decora
 ls.coreCtILF = prevdt.ctILF[(Prevalence >= cpR*nsamples(subset_samples(phyT.ctILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo ILF 
 ls.coreCtInt = prevdt.ctInt[(Prevalence >= cpR*nsamples(subset_samples(phyT.ctInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo Intestinum
-ls.coreCtBlad = prevdt.ctBlad[(Prevalence >= cpR*nsamples(subset_samples(phyT.ctBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo Bladder
+ls.coreCtBlad = prevdt.ctBlad[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdBlad3,AnimalSource=="Wlot")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Hirudo Bladder
 ls.coreCT = unique(c(ls.coreCtBlad,ls.coreCtILF,ls.coreCtInt))
 ### MA Macrobdella decora
 ls.coreMaILF = prevdt.maILF[(Prevalence >= cpR*nsamples(subset_samples(phyT.maILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts ILF (
 ls.coreMaInt = prevdt.maInt[(Prevalence >= cpR*nsamples(subset_samples(phyT.maInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts Intestinum
-ls.coreMaBlad = prevdt.maBlad[(Prevalence >= cpR*nsamples(subset_samples(phyT.maBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts Bladder
+ls.coreMaBlad = prevdt.maBlad[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdBlad3,AnimalSource=="GrotonMA")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Massachusetts Bladder
 ls.coreMA = unique(c(ls.coreMaBlad,ls.coreMaILF,ls.coreMaInt))
 ### NY Macrobdella decora
 ls.coreNyILF = prevdt.nyILF[(Prevalence >= cpR*nsamples(subset_samples(phyT.nyILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella New York ILF
@@ -172,11 +175,11 @@ ls.coreVT = unique(c(ls.coreVtBlad,ls.coreVtILF))
 ### Compiled Macrobdella decora
 ls.coreMdILF = prevdt.mdILF[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdILF,Sample_Type=="ILF")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont ILF (
 ls.coreMdInt = prevdt.mdInt[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Intestinum
-ls.coreMdBlad = prevdt.mdBlad[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Bladder
+ls.coreMdBlad = prevdt.mdBlad[(Prevalence >= cpR*nsamples(subset_samples(phyT.mdBlad3,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of core OTUs for Macrobdella Vermont Bladder
 ls.coreMd = unique(c(ls.coreCT,ls.coreMA,ls.coreNY)) # removed ls.coreVT due to this being only 1 sample
 ls.coreFeedILF = unique(c(ls.coreCtILF,ls.coreMaILF))
 ls.coreFeedInt = unique(c(ls.coreCtInt,ls.coreMaInt))
-ls.coreTot = unique(c(ls.coreMd,ls.coreHv,ls.coreCT,ls.coreMA,ls.coreNY)) # removed ls.coreVT due to this being only 1 sample
+ls.coreTot = unique(c(ls.coreMd,ls.coreHv,ls.coreCT,ls.coreMA,ls.coreNY,ls.coreMdILF,ls.coreMdInt,ls.coreMdBlad)) # removed ls.coreVT due to this being only 1 sample
 
 ############################
 ##### List common OTUs #####
@@ -213,9 +216,9 @@ ls.comMdILF = prevdt.mdILF[(Prevalence >= cpM*nsamples(subset_samples(phyT.mdILF
 ls.comMdInt = prevdt.mdInt[(Prevalence >= cpM*nsamples(subset_samples(phyT.mdInt,Sample_Type=="Intestinum")) & MaxCount >= cMin), TaxaID] # Make list of common OTUs for Macrobdella Vermont Intestinum
 ls.comMdBlad = prevdt.mdBlad[(Prevalence >= cpM*nsamples(subset_samples(phyT.mdBlad,Sample_Type=="Bladder")) & MaxCount >= cMin), TaxaID] # Make list of common OTUs for Macrobdella Vermont Bladder
 ls.comMd = unique(c(ls.comCT,ls.comMA,ls.comNY)) # removed ls.comVT due to this being only 1 sample
-ls.comTot = unique(c(ls.comMd,ls.comHv,ls.comCT,ls.comMA,ls.comNY)) # removed ls.comVT due to this being only 1 sample
+ls.comTot = unique(c(ls.comMd,ls.comHv,ls.comCT,ls.comMA,ls.comNY,ls.comMdILF,ls.comMdInt,ls.comMdBlad)) # removed ls.comVT due to this being only 1 sample
 
-#######################
+#################
 ##### Plots #####
 #################
 
@@ -223,72 +226,59 @@ ls.comTot = unique(c(ls.comMd,ls.comHv,ls.comCT,ls.comMA,ls.comNY)) # removed ls
 phyT.Md2<-subset_samples(phyT.Md,Da1F%in%c("0","1","31"))
 phyT.Md1<-subset_samples(phyT.Md2,Sample_Type!="Bladder")
 phyT.Con<-merge_phyloseq(phyT.Md1,phyT.Hv) # merge Macrobdella and Hirudo phyloseq objects (physeq control)
-phyT.BIU<-subset_samples(phyT.Con,!Sample_Type%in%c("Ovary")) # remove ovary samples (physeq bladder, ILF, intestinum) 
-
-#phyBase<-subset_samples(phyT.BIU,Da1F%in%c("0","35","99","101","108","110")) # remove days after feeding data to leave 0DaF and 5w (physeq base)
-phyT.Base<-merge_phyloseq(phyT.BIU,phyT.mdBlad)
-phyT.BasC<-subset_samples(phyT.Base,!Sample_ID%in%c("Ma5wF082117EMa.i","Ma5wF082117EMa.u","Ma5wF082117EMb.i","Ma5wF082117EMb.u","Ma5wF082117EMc.i","Ma5wF082117EMc.u")) # Remove ILF and intestinum samples from 5wF (physeq base clean)
-
-### Add new column to map data. 'Header' column will be used for pCore figure
-map.core<-sample_data(phyT.BasC) # pull map data from phyloseq object
-map.core$Header<-with(map.core,
-  ifelse(AnimalSource=="USA","USA",
-  ifelse(AnimalSource=="BBEZ","Germany",
-  ifelse(AnimalSource=="GrotonMA","MA",
-  ifelse(AnimalSource=="CarogaNY","NY",
-  ifelse(AnimalSource=="Wlot","CT",
-  ifelse(AnimalSource=="MtSnowVT","VT",
-  ifelse(AnimalSource=="Schoolhouse_Brook","CT",     
-  as.character(AnimalSource)))))))))
-
-phyT.core = merge_phyloseq(phyT.BasC,map.core) # return map data to the phyloseq object (Core phyloseq)
+phyT.base<-merge_phyloseq(phyT.Con,phyT.mdBlad)
 
 ########## Macrobdella Sites plot with 'Other' category ##########
-mat.core <- sort(taxa_sums(phyT.core), TRUE)[1:35] # Identify 27 most abundant taxa
-phyT.corePru <- prune_taxa(names(mat.core),phyT.core) # Create a subset of data including only 27 most abundant taxa
-pBar.matCore <- plot_bar(phyT.corePru,fill="Family") + 
+mat.base <- sort(taxa_sums(phyT.base), TRUE)[1:35] # Identify 27 most abundant taxa
+phyT.basePru <- prune_taxa(names(mat.base),phyT.base) # Create a subset of data including only 27 most abundant taxa
+pBar.matCore <- plot_bar(phyT.basePru,x="Sample",fill="Family") + 
   facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") + 
   scale_fill_manual(values=pairBiome)
 pBar.matCore
 
-dt.core<-data.table(psmelt(phyT.core))
+phyT.baseGI<-subset_samples(phyT.base,Sample_Type!="Bladder")
+dt.core<-data.table(psmelt(phyT.baseGI))
 dt.core$Genus3<-with(dt.core,
                     ifelse(Number%in%c(ls.coreTot),as.character(Genus2),
                            as.character("other")))
 
 # Define levels for OTUs
 dt.core$Genus3 <- factor(dt.core$Genus3, levels=c("Aeromonas","Aeromonas2",
-                                                "Mucinivorans","Bacteroides","unk_Rikenellaceae","unk_Bacteroides",
-                                                "unk_Peptostreptococcaceae","Proteocatella","unk_Proteocatella","unk_Butyricicoccus","unk_Ruminococcaceae",
-                                                "Ochrobactrum","unk_Rhodospirillaceae","Rhizobium","unk_Rhizobiales",
-                                                "unk_Comamonadaceae","unk_Methylophilaceae",
-                                                "Bdellovibrio","Desulfovibrio","unk_Myxococcales",
-                                                "Nubsella","Cetobacterium","Fusobacterium",
+                                                "Mucinivorans","Bacteroides","Millionella-like","Mucinivorans-like",
+                                                "Alkaliphilus-like","Clostridium","Proteocatella-like","unk_Peptostreptococcaceae","Butyricicoccus","Papillibacter-like","unk_Ruminococcaceae",
+                                                "Ochrobactrum","Ensifer","Rhizobium","Rhizobium-like",
+                                                "Ramlibacter","Methylopumilus-like",
+                                                "Bdellovibrio-like","Desulfovibrio","Cystobacter-like",
+                                                "Azospirillum","Insolitispirillum-like","Phreatobacter-like",
                                                 "other"))
 # Define colors for OTUs. Reference = "rainbow"
 genus.color<-c(Aeromonas="#267326",Aeromonas2="#39ac39",
-               Mucinivorans="#B80000",Bacteroides="#F00000",unk_Rikenellaceae="#FF7777",unk_Bacteroides="#ffcccc",
-               unk_Peptostreptococcaceae="#000080",Proteocatella="#0000cd",unk_Proteocatella="#8282ff",unk_Butyricicoccus="#cfcfff",unk_Ruminococcaceae="#0090b4",
-               Ochrobactrum="#b34700",unk_Rhodospirillaceae="#ff6600",Rhizobium="#ff9933",unk_Rhizobiales="#ffcc99",
-               unk_Comamonadaceae="#600080",unk_Methylophilaceae="#ac00e6",
-               Bdellovibrio="#cccc00",Desulfovibrio="#ffff00",unk_Myxococcales="#ffffb3",
-               Nubsella="#9a0066",Cetobacterium="#ffe6f7",Fusobacterium="#ff4ec5",
-               other="#808080") 
+               Mucinivorans="#B80000",Bacteroides="#F00000","Millionella-like"="#FF7777","Mucinivorans-like"="#ffcccc",
+               "Alkaliphilus-like"="#000080",Clostridium="#0000cd","Proteocatella-like"="#8282ff","unk_Peptostreptococcaceae"="#cfcfff",Butyricicoccus="#0090b4","Papillibacter-like"="#01cdff",unk_Ruminococcaceae="#80e6ff",
+               Ochrobactrum="#b34700",Ensifer="#ff6600",Rhizobium="#ff9933","Rhizobium-like"="#ffcc99",
+               Ramlibacter="#600080","Methylopumilus-like"="#ac00e6",
+               "Bdellovibrio-like"="#cccc00",Desulfovibrio="#ffff00","Cystobacter-like"="#ffffb3",
+               Azospirillum="#9a0066","Insolitispirillum-like"="#ff4ec5","Phreatobacter-like"="#ff9ade",
+               other="#808080")
 ##### Plot #####
 pBar.Core <- ggplot(dt.core, aes(x=Replicate,y=Abundance, fill=Genus3)) + 
   geom_bar(aes(), stat="identity", position="stack") +
   facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") +
-  theme(text=element_text(size=10), axis.text.x=element_text(angle=90),axis.title.x=element_blank()) +
+  theme(text=element_text(size=10), axis.text.x=element_blank(),axis.title.x=element_blank()) +
   scale_fill_manual(values=genus.color)
 pBar.Core # print plot
 ##### Figure #####
 ggsave(grid.draw(rbind(ggplotGrob(pBar.Core), size = "last")), filename="Plots/plotBarStack_Core.png", width=12,height=8)
 ##### Table #####
-write.table(tax_table(phyT.core), "tableTax_Core.csv", sep=",")
+write.table(tax_table(phyT.base), "tableTax_Core.csv", sep=",")
 write.table(dt.core,"table_dtCore.csv",sep=",")
 
+##### Figure #####
+ggsave(grid.draw(rbind(ggplotGrob(pBar.mdBlad), size = "last")), filename="Plots/plotBarStack_CoreBladderOrder.png", width=12,height=8)
+
+
 ########## Evaluation of non-core taxa ##########
-phyT.nonCore<-subset_taxa(phyT.core,!Number%in%c(ls.coreTot))
+phyT.nonCore<-subset_taxa(phyT.baseGI,!Number%in%c(ls.coreTot))
 fm.nonCore = fast_melt(phyT.nonCore) # (fast melt non core)
 prevdt.nonCore = fm.nonCore[, list(Prevalence = sum(count >= cMin),
                                    TotalPer = sum(count),
@@ -300,6 +290,7 @@ phyT.pruNonCore <- prune_taxa(ls.hiNonCore,phyT.nonCore) # remove identified tax
 ##### Plot #####
 pBar.nonCore<-plot_bar(phyT.pruNonCore,x="Replicate",fill="Genus2") + 
   facet_grid(Sample_Type~Taxonomic_ID+Header, scales="free_x",space="free") + 
+  theme(text=element_text(size=10), axis.text.x=element_blank(),axis.title.x=element_blank()) +
   scale_fill_manual(values=pairBiome)
 pBar.nonCore
 ##### Figure #####
@@ -309,7 +300,7 @@ write.table(tax_table(phyT.pruNonCore), "tableTax_nonCore.csv", sep=",")
 
 ########## Print table of core taxa with columns indicating which sample type each is present in ##########
 ### Add core columns to taxa table ###
-phyT.coreTot<-prune_taxa(ls.coreTot,phyT.core) # keep only taxa from the identified 'Core' 
+phyT.coreTot<-prune_taxa(ls.coreTot,phyT.base) # keep only taxa from the identified 'Core' 
 tax.core<-tax_table(phyT.coreTot) # pull taxonomy data from phyloseq object
 taxdt.Core<-as.data.table(tax.core) # Change taxa_table to a data.table
 taxdt.Core$Number<-as.character(taxdt.Core$Number) # force TAXcore$Number to be a character
@@ -318,10 +309,22 @@ taxdt.Core$Number<-as.character(taxdt.Core$Number) # force TAXcore$Number to be 
 taxdt.mdInt<-as.data.table(ls.coreMdInt)
 taxdt.mdInt$Md.Intestinum<-"x"
 setnames(taxdt.mdInt,"ls.coreMdInt", "Number") # First column = OTU names. Change column heading
+taxdt.mdIntCT<-as.data.table(ls.coreCtInt)
+taxdt.mdIntCT$Md.Intestinum.CT<-"x"
+setnames(taxdt.mdIntCT,"ls.coreCtInt", "Number") # First column = OTU names. Change column heading
+taxdt.mdIntMA<-as.data.table(ls.coreMaInt)
+taxdt.mdIntMA$Md.Intestinum.MA<-"x"
+setnames(taxdt.mdIntMA,"ls.coreMaInt", "Number") # First column = OTU names. Change column heading
 
 taxdt.mdILF<-as.data.table(ls.coreMdILF)
 taxdt.mdILF$Md.ILF<-"x"
 setnames(taxdt.mdILF,"ls.coreMdILF", "Number") # First column = OTU names. Change column heading
+taxdt.mdILFct<-as.data.table(ls.coreCtILF)
+taxdt.mdILFct$Md.ILF.CT<-"x"
+setnames(taxdt.mdILFct,"ls.coreCtILF", "Number") # First column = OTU names. Change column heading
+taxdt.mdILFma<-as.data.table(ls.coreMaILF)
+taxdt.mdILFma$Md.ILF.MA<-"x"
+setnames(taxdt.mdILFma,"ls.coreMaILF", "Number") # First column = OTU names. Change column heading
 
 taxdt.mdBlad<-as.data.table(ls.coreMdBlad)
 taxdt.mdBlad$Md.Bladder<-"x"
@@ -341,7 +344,7 @@ taxdt.hvBlad$Hv.Bladder<-"x"
 setnames(taxdt.hvBlad,"ls.coreHvBlad", "Number") # First column = OTU names. Change 
 
 # Merge tables
-ls.taxdt <- list(taxdt.Core,taxdt.mdILF,taxdt.mdInt,taxdt.mdBlad,taxdt.hvILF,taxdt.hvInt,taxdt.hvBlad) # list of data.tables to merge (list of taxonomy data.tables)
+ls.taxdt <- list(taxdt.Core,taxdt.mdILF,taxdt.mdILFct,taxdt.mdILFma,taxdt.mdInt,taxdt.mdIntCT,taxdt.mdIntMA,taxdt.mdBlad,taxdt.hvILF,taxdt.hvInt,taxdt.hvBlad) # list of data.tables to merge (list of taxonomy data.tables)
 lapply(ls.taxdt, function(i) setkey(i, Number)) # set key for merge function
 dt.TAXcore2 <- Reduce(function(...) merge(..., all = T), ls.taxdt) # merge list of data.tables, keeping values even if not present in each table (Taxonomy table core 2)
 dt.TAXcore2[is.na(dt.TAXcore2)] <- "" # replace <NA> values with empty values
@@ -350,12 +353,12 @@ write.table(dt.TAXcore2, "tableTax_CoreCompile.csv", row.names=FALSE,sep=",") # 
 
 ########## Print table of common taxa with columns indicating which sample type each is present in ##########
 ### Add core columns to taxa table ###
-phyT.comTot<-prune_taxa(ls.comTot,phyT.core) # keep only taxa from the identified 'Core' 
+phyT.comTot<-prune_taxa(ls.comTot,phyT.base) # keep only taxa from the identified 'Core' 
 tax.com<-tax_table(phyT.comTot) # pull taxonomy data from phyloseq object
 taxdt.Com<-as.data.table(tax.com) # Change taxa_table to a data.table
 taxdt.Com$Number<-as.character(taxdt.Com$Number) # force TAXcom$Number to be a character
 
-# Macrobdella core data
+# Macrobdella common data
 taxdt.mdInt<-as.data.table(ls.comMdInt)
 taxdt.mdInt$Md.Intestinum<-"x"
 setnames(taxdt.mdInt,"ls.comMdInt", "Number") # First column = OTU names. Change column heading
