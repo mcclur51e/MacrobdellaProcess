@@ -43,7 +43,8 @@ sample_data(phyT.Tform)$Da1Fb<-with(sample_data(phyT.Tform),
                                     ifelse(Da1F=="130","90+",
                                     ifelse(Da1F=="165","90+",
                                     ifelse(Da1F=="215","90+",
-                                    as.character(Da1F)))))))))))))))) 
+                                    ifelse(Da1F=="265","90+",
+                                    as.character(Da1F))))))))))))))))) 
 ### Add new column to map data. 'Da1fb' column will be used to merge some time points together
 sample_data(phyR.out)$Da1Fb<-with(sample_data(phyR.out),
                                   ifelse(Da1F=="8","7",
@@ -59,6 +60,14 @@ sample_data(phyR.out)$Da1Fb<-with(sample_data(phyR.out),
                                   ifelse(Da1F=="130","90+",
                                   ifelse(Da1F=="165","90+",
                                   ifelse(Da1F=="215","90+",
-                                  as.character(Da1F)))))))))))))))
+                                  ifelse(Da1F=="265","90+",
+                                  as.character(Da1F))))))))))))))))
+### Add new column to map data. 'HostSpecies' column will be used to list host species properly 
+sample_data(phyT.Tform)$HostSpecies<-with(sample_data(phyR.out),
+                                      ifelse(Taxonomic_ID=="Mdecora","M. decora",
+                                      ifelse(Taxonomic_ID=="Hverbana","H. verbana",
+                                      "unknown")))
 
-
+###############################################
+################ Practice area ################ 
+############################################### 

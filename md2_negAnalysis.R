@@ -8,12 +8,13 @@ ls.PCRnegDates<-intersect(sample_data(phyR.Md)$csv_PCRDate,sample_data(phyR.PCRn
 phyR.trim.PCRneg<-subset_samples(phyR.PCRneg,csv_PCRDate%in%c(ls.PCRnegDates)) # restrict PCR negative samples to only those from ls.PCRnegDates
 phyR.mat.PCRneg <- prune_taxa(names(sort(taxa_sums(phyR.trim.PCRneg),TRUE)[1:30]),phyR.trim.PCRneg) # Create a subset of data including only (30) most abundant taxa
 
+phyR.mat.PCRneg <- prune_taxa(names(sort(taxa_sums(phyR.PCRneg),TRUE)[1:30]),phyR.PCRneg) # Create a subset of data including only (30) most abundant taxa
+
 ### Plot ###
 pbar.PCRneg<-plot_bar(phyR.mat.PCRneg,x="EmilyID",fill="Genus") +
-  ylim(0,500) +
   theme(text=element_text(size=10), axis.title.x=element_blank()) + 
   facet_grid(Sample_Type~., scales="free_x",space="free") +
-  scale_fill_manual(values=pairBiome) 
+  scale_fill_manual(values=pal.pairBiome) 
 pbar.PCRneg # print stacked bar plot
 ggsave(grid.draw(rbind(ggplotGrob(pbar.PCRneg), size = "last")), filename="NegControls/plot_stack_negPCR.png", width=12,height=8)
 ### Table ###
@@ -67,7 +68,8 @@ write.table(contamdf.freq, "NegControls/Decontam/table_decontam_contamStatsFrequ
 ### PREVALENCE ###
 sample_data(phyR.Mdneg)$is.neg <- sample_data(phyR.Mdneg)$Sample_or_Control=="NegControl"
 contamdf.prev <- isContaminant(phyR.Mdneg, method="prevalence", neg="is.neg")
-#ls.contamPrev <- contamdf.prev$contaminant
+ls.contamPrev <- contamdf.prev$contaminant
+table(contamdf.prev$contaminant) 
 
 # Make phyloseq object of presence-absence in negative controls
 phyR.neg <- prune_samples(sample_data(phyR.Mdneg)$Sample_or_Control=="NegControl", phyR.Mdneg)
@@ -106,7 +108,7 @@ phyG.cont<-subset_samples(phyG.allc,!Age%in%c("M","G"))
 
 pbar.Contam<-plot_bar(phyG.cont,x="EmilyID",fill="Genus") +
   theme(text=element_text(size=10), axis.title.x=element_blank()) +
-  scale_fill_manual(values=pairBiome)
+  scale_fill_manual(values=pal.pairBiome)
 pbar.Contam # print plot
 ##### Figure #####
 ggsave(grid.draw(rbind(ggplotGrob(pbar.Contam), size = "last")), filename="Plots/plotBarStack_Contaminants.png", width=16,height=8)

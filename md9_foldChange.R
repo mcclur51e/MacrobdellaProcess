@@ -4,13 +4,10 @@ library("structSSI")
 #theme_set(theme_bw())
 
 ##### Shifts in abundance v. species #####
-phyT.ilf<-subset_samples(phyT.start,Sample_Type=="ILF")
-phyR.dsq<-subset_samples(phyR.out,sample_names(phyR.out)%in%c(sample_names(phyT.ilf)))
-dsq.start = phyloseq_to_deseq2(phyR.dsq, ~ Taxonomic_ID)
+phyT.mdILF<-subset_samples(phyT.md,Sample_Type=="ILF" & Da1Fb%in%c(0,2))
+phyR.dsq<-subset_samples(phyR.sin,sample_names(phyR.sin)%in%c(sample_names(phyT.mdILF)))
+dsq.start = phyloseq_to_deseq2(phyR.dsq, ~ Da1Fb)
 
-gm_mean = function(x, na.rm=TRUE){
-  exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
-}
 geoMeans = apply(counts(dsq.start), 1, gm_mean)
 esf.start = estimateSizeFactors(dsq.start, geoMeans = geoMeans)
 dsq.start = DESeq(esf.start, fitType="local")
@@ -22,8 +19,9 @@ sigtab = res[(res$padj < alpha), ]
 sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(phyR.dsq)[rownames(sigtab), ], "matrix"))
 head(sigtab)
 
-posigtab = sigtab[abs(sigtab[, "log2FoldChange"]) > 10, ]
+posigtab = sigtab[abs(sigtab[, "log2FoldChange"]) > 1, ]
 posigtab = posigtab[, c("baseMean", "log2FoldChange", "lfcSE", "padj", "Phylum", "Class", "Order","Family", "Genus","Genus2","Number","RDP")]
+ls.02<-levels(posigtab$Number)
 
 sigtabgen = subset(sigtab, !is.na(Genus2))
 # Order order
@@ -33,23 +31,69 @@ sigtabgen$Order = factor(as.character(sigtabgen$Order), levels=names(x))
 x = tapply(sigtabgen$log2FoldChange, sigtabgen$Number, function(x) max(x)) 
 x = sort(x, TRUE)
 #sigtabgen$Genus = factor(as.character(sigtabgen$Number), levels=names(x)) 
-ggplot(posigtab, aes(y=Number, x=log2FoldChange, color=Order)) +
+ggplot(posigtab, aes(y=Genus2, x=log2FoldChange, color=Order)) +
+  geom_vline(xintercept = 0.0, color = "gray", size = 0.5) +
+  geom_point(size=6) +
+  theme(axis.text.x = element_text(angle = -90, hjust = 0, vjust=0.5)) +
+  scale_color_manual(values=brewer.pal(9,"Set1")) 
+###
+phyT.mdILF<-subset_samples(phyT.md,Sample_Type=="ILF" & Da1Fb%in%c(0,4))
+phyR.dsq<-subset_samples(phyR.sin,sample_names(phyR.sin)%in%c(sample_names(phyT.mdILF)))
+dsq.start = phyloseq_to_deseq2(phyR.dsq, ~ Da1Fb)
+
+geoMeans = apply(counts(dsq.start), 1, gm_mean)
+esf.start = estimateSizeFactors(dsq.start, geoMeans = geoMeans)
+dsq.start = DESeq(esf.start, fitType="local")
+
+res = results(dsq.start)
+res = res[order(res$padj, na.last=NA), ]
+alpha = 0.001
+sigtab = res[(res$padj < alpha), ]
+sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(phyR.dsq)[rownames(sigtab), ], "matrix"))
+head(sigtab)
+
+posigtab = sigtab[abs(sigtab[, "log2FoldChange"]) > 1, ]
+posigtab = posigtab[, c("baseMean", "log2FoldChange", "lfcSE", "padj", "Phylum", "Class", "Order","Family", "Genus","Genus2","Number","RDP")]
+ls.04<-levels(posigtab$Number)
+
+sigtabgen = subset(sigtab, !is.na(Genus2))
+# Order order
+x = tapply(sigtabgen$log2FoldChange, sigtabgen$Order, function(x) max(x)) 
+x = sort(x, TRUE)
+sigtabgen$Order = factor(as.character(sigtabgen$Order), levels=names(x)) 
+x = tapply(sigtabgen$log2FoldChange, sigtabgen$Number, function(x) max(x)) 
+x = sort(x, TRUE)
+#sigtabgen$Genus = factor(as.character(sigtabgen$Number), levels=names(x)) 
+ggplot(posigtab, aes(y=Genus2, x=log2FoldChange, color=Order)) +
   geom_vline(xintercept = 0.0, color = "gray", size = 0.5) +
   geom_point(size=6) +
   theme(axis.text.x = element_text(angle = -90, hjust = 0, vjust=0.5)) +
   scale_color_manual(values=brewer.pal(9,"Set1")) 
 
 
+ls.change<-union(ls.02,ls.04)
+phyT.BWchange<-subset_samples(merge_phyloseq(phyT.mdCT,phyT.mdMA),Sample_Type=="ILF" & Da2F%in%c("none","Unk","0"))
+phyT.BWchange<-prune_taxa(c(ls.change),phyT.BWchange) # keep only core ILF and intestinum taxa (phyloseq Transformed . Days after Feeding ILF pruned)
 
+sample_data(phyT.BWchange)$Da1Fb = factor(sample_data(phyT.BWchange)$Da1Fb, levels = c(0,1,2,4,7,30,31,35,"90+")) # Reorder Da1Fb
 
-
+dt.BWmerge <- psmelt(phyT.BWchange) # create data.table from phyloseq object (data table . Box+Whisker merged)
+pBW.DaF <- ggplot(dt.BWmerge) +
+  stat_boxplot(data=dt.BWmerge, aes(x=Da1Fb, y=Abundance, fill=Da1Fb)) +    
+  scale_y_log10(limits=c(.001,1)) + 
+  facet_grid(Taxonomic_ID+Sample_Type~Order+Genus2, scales="free_x",space="free") +
+  theme_bw() +
+  xlab("Days after feeding") +
+  theme(text=element_text(size=10),strip.text=element_text(size=6), axis.text.x=element_text(angle=90,hjust=1), legend.position="none") +
+  scale_fill_manual(values=brewer.pal(8,"Greys")) 
+pBW.DaF
 
 ##### Shifts in abundance v. sample type in Macrobdella decora #####
 phyT.mdMain<-subset_samples(phyT.md,!AnimalSource%in%c("MtSnowVT","CarogaNY"))
-phyT.mdGI<-subset_samples(phyT.mdMain,Sample_Type%in%c("ILF","Intestinum"))
-phyT.mdGI<-subset_samples(phyT.mdGI,AnimalSource=="GrotonMA")
+phyT.mdGI<-subset_samples(phyT.mdMain,Sample_Type%in%c("Intestinum"))
 phyR.dsq<-subset_samples(phyR.out,sample_names(phyR.out)%in%c(sample_names(phyT.mdGI)))
-dsq.mdGI = phyloseq_to_deseq2(phyR.dsq, ~ Sample_Type)
+phyT.dsq<-subset_samples(phyT.Tform,sample_names(phyR.out)%in%c(sample_names(phyT.mdGI)))
+dsq.mdGI = phyloseq_to_deseq2(phyR.dsq, ~ AnimalSource)
 
 gm_mean = function(x, na.rm=TRUE){
   exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
@@ -63,7 +107,7 @@ res = res[order(res$padj, na.last=NA), ]
 alpha = 0.001
 sigtab = res[(res$padj < alpha), ]
 sigtab = cbind(as(sigtab, "data.frame"), as(tax_table(phyR.dsq)[rownames(sigtab), ], "matrix"), as(as.matrix(taxa_sums(phyT.dsq))[rownames(sigtab),],"numeric"))
-names(sigtab)[19]<-"count"
+names(sigtab)[21]<-"count"
 head(sigtab)
 
 posigtab = sigtab[(abs(sigtab[, "log2FoldChange"]) > 2 & sigtab[,"count"]>.001), ]

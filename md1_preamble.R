@@ -8,6 +8,7 @@ library("ape") #packageVersion("ape")
 library("data.table") #packageVersion("data.table")
 library("RColorBrewer") # design new color palette for data
 library("grid")
+library("cowplot") # used to prepare final figures
 library("vegan")
 library("decontam") # identify contaminant OTUs 
 #library("plyr") # may need to turn back 'on' and dplyr 'off'
@@ -25,7 +26,7 @@ plot.median <- function(x) {
 }
 ########## Processing Set-up ##########
 #Green,Red,Blue,Orange,Purple,Yellow,Teal,Magenta,Grey
-pairBiome<-c("#1c541c","#2f8f2f","#49c349","#bfeabf",
+pal.pairBiome<-c("#1c541c","#2f8f2f","#49c349","#bfeabf",
              "#B80000","#F00000","#FF7777","#ffcccc",
              "#000080","#0000cd","#8282ff","#cfcfff",
              "#623800","#c47000","#ff9914","#ffddb1",
@@ -34,7 +35,7 @@ pairBiome<-c("#1c541c","#2f8f2f","#49c349","#bfeabf",
              "#005f6c","#00a4bb","#1ee3ff","#bbf7ff",
              "#750063","#c400a5","#ff13da","#ffb0f3",
              "#1a1a1a","#808080","#d9d9d9","#ffffff","#808080")
-pairMini<-c("#A6CEE3","#1F78B4",
+pal.pairMini<-c("#A6CEE3","#1F78B4",
             "#B2DF8A","#33A02C",
             "#FB9A99","#E31A1C",
             "#FDBF6F","#FF7F00",
@@ -42,7 +43,8 @@ pairMini<-c("#A6CEE3","#1F78B4",
             "#FFFF99","#eded09",
             "#9aebff","#01cdff",
             "#e6e6e6","#c0c0c0")
-rainbow<-c("#ff00aa","#ac00e6","#3333ff","#0ba29a","#39ac39","#ffff00","#ff9933","#F00000","#800055")
+pal.rainbow<-c("#ff00aa","#ac00e6","#3333ff","#0ba29a","#39ac39","#ffff00","#ff9933","#F00000","#800055")
+paletteCB<-c("#999999","#e69f00","#56b4e9","#009e73","#f0e442","#0072b2","#D55e00","#cc79a7") # colorblind-friendly color palette
 
 ########## Set working directory where processing will be carried out. Make subdirectories for saving into ##########
 setwd("~/Dropbox/Manuscript_Macrobdella/Md_processData/") # set working directory for data processing. Must contain folder "DataFiles" containing "table_otu.csv", "table_tax.csv", and "table_map.csv" and/or "physeq_manuscript.RData"

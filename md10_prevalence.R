@@ -1,16 +1,17 @@
 ########################################
 ########## Find specific OTUs ##########
 ########################################
-phyT.aaa<-subset_taxa(phyT.ilf04,Number%in%c("denovo187155"))
+phyT.ddd<-subset_samples(phyT.start,Taxonomic_ID=="Mdecora")
+phyT.aaa<-subset_taxa(phyT.ddd,Number%in%c("denovo9986"))
 median(sample_sums(phyT.aaa))
 max(sample_sums(phyT.aaa))
 min(sample_sums(phyT.aaa))
-tax_table(prune_taxa(names(sort(taxa_sums(phyT.aaa), TRUE)[1:50]),phyT.aaa))[,"Genus2"]
-sort(sample_sums(phyT.aaa))
+#tax_table(prune_taxa(names(sort(taxa_sums(phyT.aaa), TRUE)[1:50]),phyT.aaa))[,"Genus2"]
+#sort(sample_sums(phyT.aaa))
 phyT.aab<-subset_samples(phyT.aaa,sample_sums(phyT.aaa)>=.001) # keep samples with >=10000 reads (physeq.minimum 10,000)
 median(sample_sums(phyT.aab))
-nsamples(phyT.aab)
-nsamples(phyT.aaa)
+#nsamples(phyT.aab)
+#nsamples(phyT.aaa)
 nsamples(phyT.aab) / nsamples(phyT.aaa)
 
 ######################################################

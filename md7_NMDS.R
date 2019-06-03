@@ -1,20 +1,92 @@
 color.DaFILF<-c("#e50000","#ac00e6","#3333ff","#0ba29a","#00cc00","#ff9933","#ff00aa","#F00000","#ffff00","#800055")
 color.DaFInt<-c("#e50000","#ac00e6","#3333ff","#0ba29a","#ff9933","#ff00aa","#F00000","#800055")
 
-########## ILF/AnimalSource NMDS ##########
-dsNMDS<-subset_samples(phyT.mdILF,!Da1F%in%c("4")) # define data for analysis
+###################################################################################
+########## FIGURE 1 ##########
+#### Host Species and Sample Type NMDS ###
+dsNMDS<-phyT.leech # define data for analysis
+sample_data(dsNMDS)$Sample_Type = factor(sample_data(dsNMDS)$Sample_Type, levels = c("ILF","Intestinum","Bladder"))
+mNMDS<-"unifrac" # define metric for analysis
+distOrd = phyloseq::distance(dsNMDS, method = c(mNMDS)) # calculate distances
+ord = ordinate(dsNMDS, method = "NMDS", distance = distOrd) # calculate ordination
+
+nmds.SpeciesType<-plot_ordination(dsNMDS, ord, shape="Taxonomic_ID",color="Sample_Type") + 
+  geom_point(aes(fill=Sample_Type),size=2) +
+  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
+  scale_color_manual(values=pal.CB) +
+  theme_bw() +
+  theme(text=element_text(size=10),legend.position="none")
+nmds.SpeciesType # uncomment to print plot
+
+### Host Species and Sample Type by Order NMDS###
+dsNMDSorder<-tax_glom(dsNMDS,taxrank="Order")
+distOrdO = phyloseq::distance(dsNMDSorder, method = c(mNMDS)) # calculate distances
+ordO = ordinate(dsNMDSorder, method = "NMDS", distance = distOrdO) # calculate ordination
+nmds.SpeciesTypeOrder<-plot_ordination(dsNMDSorder, ordO, shape="Taxonomic_ID",color="Sample_Type") + 
+  geom_point(aes(fill=Sample_Type),size=2) +
+  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
+  scale_color_manual(values=pal.CB) +
+  theme_bw() +
+  theme(text=element_text(size=10),legend.position="none")
+#nmds.SpeciesTypeOrder # uncomment to print plot
+ggsave(plot_grid(nmds.SpeciesType, nmds.SpeciesTypeOrder, labels = "AUTO"), filename="NMDS/plotNMDS_fig1.eps", device="eps", dpi="retina",width=6.87,units="in") # Save FIGURE 1 to .eps file
+
+###################################################################################
+
+########## FIGURE 4 ##########
+### ILF/WildTime NMDS ###
+dsNMDS<-subset_samples(phyT.md,Sample_Type=="ILF") # define data for analysis
+sample_data(dsNMDS)$WildMonth = factor(sample_data(dsNMDS)$WildMonth, levels = c("April","June","July","August","September","October")) # force Months to be in chronological order (instead of alphabetical default)
+mNMDS<-"unifrac" # define metric for analysis
+distOrd = phyloseq::distance(dsNMDS, method = c(mNMDS)) # calculate distances
+ord = ordinate(dsNMDS, method = "NMDS", distance = distOrd) # calculate ordination
+nmds.collILF<-plot_ordination(dsNMDS, ord, color = "WildMonth") + 
+  geom_point(aes(fill=WildMonth),size=3) +
+  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
+  scale_color_manual(values=c("#9bcdff","#ffb4b4","#ff0101","#810000","#810000","#005ab4")) +
+  theme_bw() +
+  theme(text=element_text(size=10), legend.position="none")
+nmds.collILF # uncomment to print plot
+
+### Intestinum/WildTime NMDS ###
+dsNMDSint<-subset_samples(phyT.md,Sample_Type=="Intestinum") # define data for analysis
+sample_data(dsNMDSint)$WildMonth = factor(sample_data(dsNMDSint)$WildMonth, levels = c("April","June","July","August","September","October")) # force Months to be in chronological order (instead of alphabetical default)
+distOrdInt = phyloseq::distance(dsNMDSint, method = c(mNMDS)) # calculate distances
+ordInt = ordinate(dsNMDSint, method = "NMDS", distance = distOrdInt) # calculate ordination
+# PCoA. May want to change color= , shape= , alpha= , and size=
+nmds.collInt<-plot_ordination(dsNMDSint, ordInt, color = "WildMonth") + 
+  geom_point(aes(fill=WildMonth),size=3) +
+  stat_ellipse(type = "t", level = 0.95, linetype = 2) +
+  scale_color_manual(values=c("#9bcdff","#ffb4b4","#ff0101","#810000","#810000","#005ab4")) +
+  theme_bw() +
+  theme(text=element_text(size=10), legend.position="none")
+#nmds.collInt # uncomment to print plot
+ggsave(plot_grid(nmds.collILF, nmds.collInt, labels = "AUTO"), filename="NMDS/plotNMDS_fig4.eps", device="eps", dpi="retina",width=6.87,units="in") # Save FIGURE 4 to .eps file
+###################################################################################
+
+
+
+
+########## Sample Type NMDS ##########
+dsNMDS<-subset_samples(phyT.md) # define data for analysis
+sample_data(dsNMDS)$Sample_Type = factor(sample_data(dsNMDS)$Sample_Type, levels = c("ILF","Intestinum","Bladder"))
 mNMDS<-"unifrac" # define metric for analysis
 distOrd = phyloseq::distance(dsNMDS, method = c(mNMDS)) # calculate distances
 ord = ordinate(dsNMDS, method = "NMDS", distance = distOrd) # calculate ordination
 # PCoA. May want to change color= , shape= , alpha= , and size=
-nmds.Geo<-plot_ordination(dsNMDS, ord, color = "AnimalSource") + 
-  geom_point(size=6,mapping = aes(color=AnimalSource)) +
+nmds.Type<-plot_ordination(dsNMDS, ord, shape="Sample_Type") + 
+  geom_point(size=6,alpha=0.75) +
   ggtitle(c(mNMDS)) + 
-  stat_ellipse(type = "t", level = 0.9, linetype = 2) +
-  scale_color_manual(values=brewer.pal(6,"Set1"))
-nmds.Geo
+  stat_ellipse(type = "t", level = 0.99, linetype = 2) +
+  scale_shape_manual(values=c(15,16,4),name="Organ Sampled") +
+  scale_color_grey() +
+  theme_bw()
+nmds.Type
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(nmds.Geo), size = "last")), filename="NMDS/plotNMDS_ILFgeo.eps", device="eps", width=8,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(nmds.Type), size = "last")), filename="NMDS/plotNMDS_sampleType.eps", device="eps", width=10,height=8)
+
+
+
 
 ########## Sample_Type NMDS ##########
 ### Find outlier samples ###
@@ -41,7 +113,7 @@ nmdsType
 ggsave(grid.draw(rbind(ggplotGrob(nmdsType), size = "last")), filename="NMDS/plotNMDS_type.eps", device="eps", width=10,height=8)
 ##### Figure #####
 
-########## DaF ILF NMDS ##########
+########## Macrobdella DaF ILF NMDS ##########
 phyT.mdDaFILF<-subset_samples(phyT.mdDaF,Sample_Type%in%c("ILF")) # Keep only Intestinum samples
 sample_data(phyT.mdDaFILF)$Da1Fb = factor(sample_data(phyT.mdDaFILF)$Da1Fb, levels = c(0,1,2,4,7,30,31,35,"90+",100,113,215)) # Reorder Da1F
 #dsNMDSdaf<-subset_samples(phyT.mdDaFILF,AnimalSource=="Wlot")
@@ -49,16 +121,37 @@ dsNMDSdaf<-phyT.mdDaFILF
 mNMDS.daf<-"unifrac" # define metric for analysis
 # calculate distances
 distOrdDaf = phyloseq::distance(dsNMDSdaf, method = c(mNMDS.daf)) # calculate distances
-OrdDaf = ordinate(dsNMDSdaf, method = "NMDS", distance = distOrdDaf) # calculate ordination
+OrdDaf = ordinate(dsNMDSdaf, method = "PCoA", distance = distOrdDaf) # calculate ordination
 # PCoA. May want to change color= , shape= , alpha= , and size=
 nmds.DaFILF<-plot_ordination(dsNMDSdaf, OrdDaf, color = "Da1Fb") + 
   geom_point(size=6,mapping = aes(color=Da1Fb)) +
   ggtitle(bquote("ILF" + .(c(mNMDS.daf)))) +
   stat_ellipse(type = "t", level = 0.75, linetype = 2) +
-  scale_color_manual(values=color.DaFILF) 
+  scale_color_manual(values=color.DaFILF) +
+  theme_bw()
 nmds.DaFILF
 ##### Figure #####
 ggsave(grid.draw(rbind(ggplotGrob(nmds.DaFILF), size = "last")), filename="NMDS/plotNMDS_Da1FILF.eps", device="eps", width=8,height=8)
+
+########## Hirudo DaF ILF NMDS ##########
+phyT.hvILF<-subset_samples(phyT.Hv,Sample_Type%in%c("ILF")) # Keep only Intestinum samples
+sample_data(phyT.hvILF)$Da1Fb = factor(sample_data(phyT.hvILF)$Da1Fb, levels = c(0,1,2,4,7,30,31,35,"90+",100,113,215)) # Reorder Da1F
+#dsNMDSdaf<-subset_samples(phyT.mdDaFILF,AnimalSource=="Wlot")
+dsNMDSdaf<-phyT.hvILF
+mNMDS.daf<-"unifrac" # define metric for analysis
+# calculate distances
+distOrdDaf = phyloseq::distance(dsNMDSdaf, method = c(mNMDS.daf)) # calculate distances
+OrdDaf = ordinate(dsNMDSdaf, method = "PCoA", distance = distOrdDaf) # calculate ordination
+# PCoA. May want to change color= , shape= , alpha= , and size=
+nmds.hvDaFILF<-plot_ordination(dsNMDSdaf, OrdDaf, color = "Da1Fb") + 
+  geom_point(size=6,mapping = aes(color=Da1Fb)) +
+  ggtitle(bquote("Hirudo verbana ILF" + .(c(mNMDS.daf)))) +
+  stat_ellipse(type = "t", level = 0.75, linetype = 2) +
+  scale_color_manual(values=color.DaFILF) +
+  theme_bw()
+nmds.hvDaFILF
+##### Figure #####
+ggsave(grid.draw(rbind(ggplotGrob(nmds.hvDaFILF), size = "last")), filename="NMDS/plotNMDS_hvDa1FILF.eps", device="eps", width=8,height=8)
 
 ########## DaF Intestinum NMDS ##########
 phyT.mdDaFInt<-subset_samples(phyT.mdDaF,Sample_Type%in%c("Intestinum")) # Keep only Intestinum samples
@@ -67,13 +160,14 @@ dsNMDSdaf<-phyT.mdDaFInt
 mNMDS.daf<-"unifrac" # define metric for analysis
 # calculate distances
 distOrdDaf = phyloseq::distance(dsNMDSdaf, method = c(mNMDS.daf)) # calculate distances
-OrdDaf = ordinate(dsNMDSdaf, method = "NMDS", distance = distOrdDaf) # calculate ordination
+OrdDaf = ordinate(dsNMDSdaf, method = "PCoA", distance = distOrdDaf) # calculate ordination
 # PCoA. May want to change color= , shape= , alpha= , and size=
 nmds.DaFInt<-plot_ordination(dsNMDSdaf, OrdDaf, color = "Da1Fb") + 
   geom_point(size=6,mapping = aes(color=Da1Fb)) +
   ggtitle(bquote("Intestinum" + .(c(mNMDS.daf)))) +
   stat_ellipse(type = "t", level = 0.75, linetype = 2) +
-  scale_color_manual(values=color.DaFInt) 
+  scale_color_manual(values=color.DaFInt) +
+  theme_bw()
 nmds.DaFInt
 ##### Figure #####
 ggsave(grid.draw(rbind(ggplotGrob(nmds.DaFInt), size = "last")), filename="NMDS/plotNMDS_Da1FInt.eps", device="eps", width=8,height=8)

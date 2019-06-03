@@ -3,7 +3,7 @@
 phyT.adonis<-phyT.start # assign data for permanova testing (phyloseq transformed . adonis function)
 bray.md<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
 sd.md <- data.frame(sample_data(phyT.adonis)) # make a data frame from the sample_data (sample data . macrobdella decora)
-perm.md<-adonis(bray.md ~ Taxonomic_ID, data = sd.md, method = "bray") # Adonis test (permanova . macrobdella decora)
+perm.md<-adonis(bray.md ~ Taxonomic_ID * Sample_Type, data = sd.md, method = "bray") # Adonis test (permanova . macrobdella decora)
 perm.md
 
 ##### PERMANOVA for taxonomic groups merged at "Order" #####
@@ -11,7 +11,7 @@ phyT.adonis<-phyT.start # assign data for permanova testing (phyloseq transforme
 phyT.adonis<-tax_glom(phyT.adonis,taxrank="Order")
 bray.md<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
 sd.md <- data.frame(sample_data(phyT.adonis)) # make a data frame from the sample_data (sample data . macrobdella decora)
-perm.md<-adonis(bray.md ~ Taxonomic_ID, data = sd.md, method = "bray") # Adonis test (permanova . macrobdella decora)
+perm.md<-adonis(bray.md ~ Taxonomic_ID * Sample_Type, data = sd.md, method = "bray") # Adonis test (permanova . macrobdella decora)
 perm.md
 
 ###### Macrobdella decora #####
@@ -19,11 +19,62 @@ phyT.md<-subset_samples(phyT.start,Taxonomic_ID=="Mdecora") # keep only Mdecora 
 phyT.adonis<-phyT.md # assign data for permanova testing (phyloseq transformed . adonis function)
 bray.md<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
 sd.md <- data.frame(sample_data(phyT.adonis)) # make a data frame from the sample_data (sample data . macrobdella decora)
-perm.md<-adonis(bray.md ~ Sample_Type * WildMonth * Da1Fb * AnimalSource, data = sd.md, method = "bray") # Adonis test (permanova . macrobdella decora)
+perm.md<-adonis(bray.md ~ Sample_Type * WildMonth * Da1Fb * AnimalSource * Source_ID, data = sd.md, method = "bray") # Adonis test (permanova . macrobdella decora)
 perm.md
 
-##### Affect of extraction method #####
-phyT.md<-subset_samples(phyT.start,Taxonomic_ID=="Mdecora") # keep only Mdecora samples (phyloseq trasnformed . macrobdella decora)
+sample_data(phyT.adonis)$WildSeason<-with(sample_data(phyT.adonis),
+                                          ifelse(WildMonth=="April","April",
+                                          ifelse(WildMonth=="October","October",
+                                          "Summer")))
+bray.mdILF<- phyloseq::distance(subset_samples(phyT.adonis,Sample_Type=="ILF"), method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
+sd.mdILF <- data.frame(sample_data(subset_samples(phyT.adonis,Sample_Type=="ILF"))) # make a data frame from the sample_data (sample data . macrobdella decora)
+pairwise.adonis(bray.mdILF,sd.mdILF$WildSeason)
+
+bray.mdInt<- phyloseq::distance(subset_samples(phyT.adonis,Sample_Type=="Intestinum"), method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
+sd.mdInt <- data.frame(sample_data(subset_samples(phyT.adonis,Sample_Type=="Intestinum"))) # make a data frame from the sample_data (sample data . macrobdella decora)
+pairwise.adonis(bray.mdInt,sd.mdInt$WildSeason)
+
+phyT.mdMA<-subset_samples(phyT.md,AnimalSource=="GrotonMA" & Da1F%in%c("0")) # keep only Mdecora samples (phyloseq trasnformed . macrobdella decora)
+phyT.adonis<-phyT.mdMA # assign data for permanova testing (phyloseq transformed . adonis function)
+bray.mdMA<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
+sd.mdMA <- data.frame(sample_data(phyT.adonis)) # make a data frame from the sample_data (sample data . macrobdella decora)
+perm.mdMA<-adonis(bray.mdMA ~ Sample_Type, data = sd.mdMA, method = "bray") # Adonis test (permanova . macrobdella decora)
+perm.mdMA
+
+ls.mdMAhi<-taxa_names(prune_taxa(names(sort(taxa_sums(phyT.mdMA), TRUE)[1:10]),phyT.mdMA))
+
+dt.mdMA = fast_melt(phyT.mdMA) # make data table from physeq object (data table. physeq Pruned)
+prev.mdMA = dt.mdMA[, list(Prevalence = sum(count >= .0001), 
+                               TotalPer = sum(count),
+                               MinCount = min(count),
+                               MaxCount = max(count)),
+                        by = TaxaID] # make simple table listing 'TaxaID, Prevalence, and TotalPer' (prevalence . physeq Pruned)
+ls.mdMAprev = prev.mdMA[(Prevalence > 1 & MaxCount >= .001), TaxaID] # Make list of OTUs present in dataset and having at least maxNeg reads in at least one sample (list.high prevalence)
+
+phyT.adonisR <- phyT.adonis
+for(otu in c(ls.mdMAprev)){
+  phyT.adonis<-subset_taxa(phyT.adonisR,Number==c(otu))
+  print(otu)
+  bray.mdILF<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix
+  sd.mdILF <- data.frame(sample_data(phyT.adonis)) # make a data frame from the sample_data
+  print(pairwise.adonis(bray.mdILF,paste(sd.mdILF$Sample_Type)))
+}
+
+
+
+
+
+
+
+phyT.mdCT<-subset_samples(phyT.md,AnimalSource=="Wlot" & Da1F%in%c("0")) # keep only Mdecora samples (phyloseq trasnformed . macrobdella decora)
+phyT.adonis<-phyT.mdCT # assign data for permanova testing (phyloseq transformed . adonis function)
+bray.mdCT<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
+sd.mdCT <- data.frame(sample_data(phyT.adonis)) # make a data frame from the sample_data (sample data . macrobdella decora)
+perm.mdCT<-adonis(bray.mdCT ~ Sample_Type, data = sd.mdCT, method = "bray") # Adonis test (permanova . macrobdella decora)
+perm.mdCT
+
+##### Effect of extraction method #####
+phyT.md<-subset_samples(phyT.leech,Taxonomic_ID=="Mdecora") # keep only Mdecora samples (phyloseq trasnformed . macrobdella decora)
 phyT.adonis<-phyT.md # assign data for permanova testing (phyloseq transformed . adonis function)
 bray.md<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
 sd.md <- data.frame(sample_data(phyT.adonis)) # make
@@ -35,7 +86,7 @@ phyT.hv<-subset_samples(phyT.start,Taxonomic_ID=="Hverbana") # keep only Mdecora
 phyT.adonis<-phyT.hv # assign data for permanova testing (phyloseq transformed . adonis function)
 bray.hv<- phyloseq::distance(phyT.adonis, method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
 sd.hv <- data.frame(sample_data(phyT.adonis)) # make a data frame from the sample_data (sample data . macrobdella decora)
-perm.hv<-adonis(bray.hv ~ Sample_Type * Da1Fb * AnimalSource, data = sd.hv, method = "bray") # Adonis test (permanova . macrobdella decora)
+perm.hv<-adonis(bray.hv ~ Sample_Type * Da1Fb * AnimalSource * ParentLot, data = sd.hv, method = "bray") # Adonis test (permanova . macrobdella decora)
 perm.hv
 
 
@@ -141,6 +192,7 @@ for(otu in c(ls.mdInt0)){
 
 ########## DaF in a loop ##########
 ### Macrobdella decora ILF by Da1F ###
+phyT.mdDaFILF<-phyT.coreILF
 ls.Da1F<-levels(factor(sample_data(phyT.mdDaFILF)$Da1Fb))
 mtx.sigDaFILF<-matrix(ncol=length(ls.Da1F),nrow=length(ls.Da1F))
 dimnames(mtx.sigDaFILF) = list(c(ls.Da1F),c(ls.Da1F))
@@ -150,7 +202,7 @@ for(day1 in c(ls.Da1F)){
     loop.mdILF<-subset_samples(phyT.mdDaFILF,Da1Fb%in%c(day1,day)) # Examine only ILF data
     bray.mdILF<- phyloseq::distance(loop.mdILF, method = "bray") # Calculate bray curtis distance matrix
     df.mdILF <- data.frame(sample_data(loop.mdILF)) # make a data frame from the sample_data
-    perm.mdILF<-adonis(bray.mdILF ~ Da1Fb * AnimalSource, data = df.mdILF, method = "bray") # Adonis test
+    perm.mdILF<-adonis(bray.mdILF ~ Da1Fb, data = df.mdILF, method = "bray") # Adonis test
     sig.mdILF<-as.data.frame(perm.mdILF$aov.tab)["Da1F", "Pr(>F)"]
     print(perm.mdILF$aov.tab)
     mtx.sigDaFILF[day1,day] <- as.numeric(sig.mdILF)
@@ -165,12 +217,12 @@ write.table(mtx.sigDaFILF, "tableSig_DaFMd_ILF.csv", sep=",",row.names=TRUE,col.
 ############################################### 
 
 # by ILF
-phyT.coreILF<-subset_samples(phyT.mdDaFGIpr,Sample_Type=="ILF") # Examine only ILF data
+phyT.coreILF<-subset_samples(phyT.md,Sample_Type=="ILF" & AnimalSource%in%c("Wlot","GrotonMA")) # Examine only ILF data
 bray.coreILF<- phyloseq::distance(phyT.coreILF, method = "bray") # Calculate bray curtis distance matrix
 df.sampleCoreILF <- data.frame(sample_data(phyT.coreILF)) # make a data frame from the sample_data
-perm.coreILF<-adonis(bray.coreILF ~ Taxonomic_ID, data = df.sampleCoreILF, method = "bray") # Adonis test
-sig.coreILF<-as.data.frame(perm.coreILF$aov.tab)["Taxonomic_ID", "Pr(>F)"]
-beta <- betadisper(bray.coreILF, df.sampleCoreILF$Taxonomic_ID)
+perm.coreILF<-adonis(bray.coreILF ~ Da1Fb, data = df.sampleCoreILF, method = "bray") # Adonis test
+sig.coreILF<-as.data.frame(perm.coreILF$aov.tab)["Da1Fb", "Pr(>F)"]
+beta <- betadisper(bray.coreILF, df.sampleCoreILF$Da1Fb)
 permutest(beta)
 # by Intestinum
 phyT.coreInt<-subset_samples(phyT.mdDaFGIpr,Sample_Type=="Intestinum") # Examine only Intestinum data
@@ -230,6 +282,16 @@ sig.coreMdGI
 ###############################################
 ################ Practice area ################ 
 ############################################### 
+
+bray.mdInt<- phyloseq::distance(subset_samples(phyT.md,Sample_Type=="ILF"), method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
+sd.mdInt <- data.frame(sample_data(subset_samples(phyT.md,Sample_Type=="ILF"))) # make a data frame from the sample_data (sample data . macrobdella decora)
+pairwise.adonis(bray.mdInt,sd.mdInt$AnimalSource)
+
+bray.mdInt<- phyloseq::distance(subset_samples(phyT.md,Sample_Type=="ILF" & AnimalSource%in%c("Wlot","GrotonMA")), method = "bray") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
+sd.mdInt <- data.frame(sample_data(subset_samples(phyT.md,Sample_Type=="ILF" & AnimalSource%in%c("Wlot","GrotonMA")))) # make a data frame from the sample_data (sample data . macrobdella decora)
+pairwise.adonis(bray.mdInt,sd.mdInt$AnimalSource)
+
+
 
 #### Are LinA samples ok to use? ####
 

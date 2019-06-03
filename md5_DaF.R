@@ -2,7 +2,7 @@
 phyT.mdDaF<-merge_phyloseq(phyT.mdCT,phyT.mdMA) # merge fed samples from CT and MA
 phyT.mdDaFGI<-subset_samples(phyT.mdDaF,Sample_Type%in%c("ILF","Intestinum")) # Keep only ILF and intestinum samples
 phyT.core.mdDaF<-prune_taxa(ls.coreTot,phyT.mdDaFGI) # keep only core taxa
-sample_data(phyT.mdDaFGI)$Da1Fb = factor(sample_data(phyT.mdDaFGI)$Da1Fb, levels = c(0,1,2,4,7,30,31,35,100,113,215)) # Reorder Da1Fb
+sample_data(phyT.mdDaFGI)$Da1Fb = factor(sample_data(phyT.mdDaFGI)$Da1Fb, levels = c(0,1,2,4,7,30,31,35,"90+",100,113,215)) # Reorder Da1Fb
 
 
 ### Make plot
@@ -284,7 +284,8 @@ ggsave(grid.draw(rbind(ggplotGrob(pbox.ProtInt), size = "last")), filename="Plot
 library(grid)
 library(gtable)
 
-phyT.bwdat<-merge_phyloseq(phyT.mdDaFILF,phyT.hvILF) 
+phyT.mdDaFILF<-subset_samples(phyT.start,Sample_Type%in%c("ILF")) # Keep only ILF samples
+phyT.bwdat<-subset_samples(phyT.start,Sample_Type%in%c("ILF"))
 sample_data(phyT.bwdat)$Da1Fb = factor(sample_data(phyT.bwdat)$Da1Fb, levels = c(0,1,2,4,7,30,31,35,"90+",100,113,215)) # Reorder Da1Fb
 phyT.bwdatP<-prune_taxa(union(ls.coreMdILF,ls.comHvILF0),phyT.bwdat) # keep only core ILF taxa (box+whisker data pruned)
 phyT.bwdatPmer<-tax_glom(phyT.bwdatP,"Genus2")
@@ -346,24 +347,24 @@ for (f in c(ls.bwGen)){
 }
 
 # VERTICAL boxplot + log y-scale + facet by age + hi/lo bounds
-pbox.ProtILF <- ggplot(dt.bwMelt) +
-  ggtitle("Macrobdella ILF Taxa") + 
-  stat_boxplot(data=dt.bwMelt, aes(x=Da1Fb, y=Abundance, fill=Da1Fb)) +    
-  scale_y_log10(limits=c(.0001,1)) + 
-  facet_grid(Taxonomic_ID~Genus2, scales="free_x",space="free") +
+pbox.dafILF <- ggplot(dt.bwMelt) +
+  ggtitle("Post-Feeding ILF Taxa") + 
+  stat_boxplot(data=dt.bwMelt, aes(x=Da1Fb, y=Abundance)) +    
+  scale_y_log10(limits=c(.001,1)) + 
+  facet_grid(Taxonomic_ID~Order+Genus2, scales="free_x",space="free") +
   #geom_line(data=dt.bwMelt,aes(x=as.numeric(Da1Fb),y=Q50),linetype=2) + 
   #geom_ribbon(data=dt.bwMelt, aes(x=as.numeric(Da1Fb), ymin=Q25, ymax=Q75),fill="black", alpha=0.1) +
-  theme(text=element_text(size=10),strip.text=element_text(size=rel(1)), axis.title.x=element_blank(), legend.position="none") +
-  scale_fill_manual(values=brewer.pal(8,"Greys"))   
-pbox.ProtILF
+  theme(text=element_text(size=10),strip.text=element_text(size=rel(1)), axis.title.x=element_blank(), legend.position="none",panel.background = element_rect(fill = "white", colour = NA)) +
+  scale_fill_manual(values=brewer.pal(8,"Greys"))
+pbox.dafILF
 ##### Figure #####
-ggsave(grid.draw(rbind(ggplotGrob(pbox.ProtILF), size = "last")), filename="Plots/plotBox_Da1FILF.eps", device="eps", width=12,height=8)
+ggsave(grid.draw(rbind(ggplotGrob(pbox.dafILF), size = "last")), filename="Plots/plotBox_Da1FILF.eps", device="eps", width=16,height=8)
 
 phyT.hvILF
 phyTmat.hvILF <- prune_taxa(names(sort(taxa_sums(phyT.hvILF), TRUE)[1:35]),phyT.hvILF) # Create a subset of data including only 27 most abundant taxa
 pBar.hvILF <- plot_bar(phyTmat.hvILF,x="Sample",fill="BLASTn") + 
-  facet_grid(Sample_Type~Da1F, scales="free_x",space="free") + 
-  scale_fill_manual(values=pairBiome)
+  facet_grid(AnimalSource~Da1F, scales="free_x",space="free") + 
+  scale_fill_manual(values=pal.pairBiome)
 pBar.hvILF
 
 phyT.aaa<-subset_samples(phyT.hvILF,Da1Fb%in%c("0","90+"))
@@ -405,7 +406,7 @@ prev.hvILF = dt.hvILF[, list(Prevalence = sum(count >= .001),
 # Thank you to jeffkimbrel ! #
 ##### weighted Unifrac distance by Da1F #####
 ##### Unifrac distance by Da1F #####
-phyT.aaa<-subset_samples(phyT.start,Sample_Type=="ILF" & Taxonomic_ID=="Mdecora")
+phyT.aaa<-subset_samples(phyT.start,Sample_Type=="ILF" & Taxonomic_ID=="Mdecora" & Header=="CT")
 sample_data(phyT.aaa)$fuck<-sample_names(phyT.aaa)
 
 dist.md<- phyloseq::distance(phyT.aaa, method = "wunifrac") # Calculate bray curtis distance matrix (bray metric . macrobdella decora)
@@ -417,14 +418,14 @@ md = melt(as.matrix(dist.md)) %>%
 
 # get sample data (S4 error OK and expected)
 sd = sample_data(phyT.aaa) %>%
-  select("fuck","Da1Fb") %>%
+  select("fuck","Da1Fb","Header") %>%
   mutate_if(is.factor,as.character) 
 
 # combined distances with sample data
-colnames(sd) = c("Var1", "Type1")
+colnames(sd) = c("Var1", "Type1","Source")
 wu.sd = left_join(md, sd, by = "Var1")
 
-colnames(sd) = c("Var2", "Da1F")
+colnames(sd) = c("Var2", "Da1F","Source")
 wu.sd = left_join(wu.sd, sd, by = "Var2")
 
 wu.sd2<-wu.sd[wu.sd$Type1==0,]
@@ -433,12 +434,11 @@ colnames(wu.sd2)[colnames(wu.sd2)=="value"] <- "distance"
 
 # plot
 ggplot(wu.sd2, aes(x = Da1F, y = distance)) +
-  theme_bw() +
   geom_point() +
   geom_jitter(width = 0.2) +
-  geom_boxplot() +
+  geom_boxplot(alpha=0.5) +
   theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  ggtitle("Macrobdella decora Weighted Unifrac")
+  theme_bw()
 
 
 ##### H verbana #####
