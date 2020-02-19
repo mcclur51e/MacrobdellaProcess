@@ -1,5 +1,10 @@
-# MacrobdellaProcess
+# Most current files
+table_map_simple.csv # required for phyloseq processing using code file
 
+md_DADA2.R # complete updated and commented code for processing data as reported in "Macrobdella decora: Old World Leech Gut Microbial Community Structure Conserved in a New World Leech"
+
+
+# MacrobdellaProcess
 Started 2018_0309
 
 Preamble = preamble of packages and commands for processing data. Defines pairBiome set of colors 
